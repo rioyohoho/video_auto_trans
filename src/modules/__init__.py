@@ -1,0 +1,1 @@
+from .demucs import Processor
