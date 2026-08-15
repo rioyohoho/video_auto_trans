@@ -1,6 +1,5 @@
 # video_auto_trans
-This project provides a comprehensive, end-to-end Python solution designed to fully automate video editing, localization, and content creation workflows using cutting-edge AI technologies
-
+This project utilizes AI models to develop various functionalities including audio, text-to-speech, speech-to-text, and translation.
 
 
 ## Requirements
@@ -23,6 +22,7 @@ pip install easyocr
 pip install python-dotenv colorama, tabulate
 pip install omegaconf semver speechbrain tensorboardx "click>=8.4.2"
 ```
+
 ## Use Torch: CPU
 ```
 pip install "audio-separator"
@@ -101,6 +101,20 @@ python s2_translates.py -i "D:/test/test.json"
 ```
 python s3_audio.py -i "D:/test/test.vi.json"
 ```
+### Text to AI Speech (XTTS)
+| Name | Cmd  |
+| :--- | :--- |
+| **Default** | `python s3.1_AI_speechs.py` |
+
+| **& Params** | short | name | EX |
+| :--- | :--- | :--- | :--- |
+| input path / text | -i | --input | -i "D:/data.json" *or* -i "Xin chào bạn" |
+| output path | -o | --output | -o "./output.wav" |
+| template voice | -t | --temple | -t "D:/samples/voice.wav" |
+| language | -l | --language | -l "vi" *or* -l "en" |
+```bash
+python s3.1_AI_speechs.py -l "vi" -o "./test.wav" -t "assets/tmp_voices/Adam.mp3" -i "Xin chào, đây là giọng nói AI thử nghiệm." 
+```
 ### Transcribe Audio & Length
 | Name | Cmd  |
 | :--- | :--- |
@@ -116,7 +130,7 @@ python s3_audio.py -i "D:/test/test.vi.json"
 | condition on previous text | -c-copt | --condition_on_previous_text | -c-copt False |
 | vad filter | -c-vf | --vad_filter | -c-vf True |
 ```
-python s3.1_srt.py -i "D:\test\test.vi.mp3" -w 1 -c-vf 0
+python s3.2_srt.py -i "D:\test\test.vi.mp3" -w 1 -c-vf 0
 ```
 ### Video Rendering & Complex Processing
 | Name | Cmd |
