@@ -1,6 +1,5 @@
 # video_auto_trans
-This project provides a comprehensive, end-to-end Python solution designed to fully automate video editing, localization, and content creation workflows using cutting-edge AI technologies
-
+This project utilizes AI models to develop various functionalities including audio, text-to-speech, speech-to-text, and translation.
 
 
 ## Requirements
