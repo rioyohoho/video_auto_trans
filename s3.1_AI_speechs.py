@@ -3,17 +3,19 @@ import sys
 from pathlib import Path
 from tabulate import tabulate
 from src.modules.speech_ai import XTTSProcessor
-from src.utils import ext, txt, file, agr, r_json, listFilter, handle_input, txt_normalize, cal_time
+from src.utils import ext, txt, file, agr, r_json, listFilter, handle_input, txt_normalize, cal_time, normalize_vietnamese_text
 from src.configuration import PATH_BASE, P_DIR, TAR_LANG, XTTS_TMP_VOICE
 P = os.path
-processor = cal_time(lambda: XTTSProcessor(), 'XTTSProcessor', 1, 1)
+processor = cal_time(lambda: XTTSProcessor(), 'LOAD: XTTSProcessor', 1, 1)
 
 def run(text: str, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE)):
-    ts = processor.split_text_by_tokens(text, lang=language)
+    if language == 'vi': text = normalize_vietnamese_text(text)
+    ts = processor.split_text_by_tokens(text, lang=language, mt=100)
+    mini_text = lambda txt,sz=100: txt if len(txt)<=sz else txt[:sz//2]+' ... '+txt[-sz//2:]
     txt.cyan(tabulate(
         maxcolwidths=[None, None, None, 50],
         headers=['language', 'output', 'tmp_voice', 'texts'],
-        tabular_data=[(language, str(output), str(tmp_voice), ts)],
+        tabular_data=[(language, str(output), str(tmp_voice), mini_text('\n'.join(ts), 50))],
         tablefmt="grid"
     ))
     processor.save(output, processor.concat(processor.text_to_ai_speeches(ts, language=language, tmp_voice=tmp_voice)))
@@ -28,7 +30,7 @@ def _exec(p: Path, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE):
         return
     run(d, o or p.with_suffix(f'.{l}.wav'), l, t)
 def _exec_str(text: str, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE):
-    run(text, o or Path(f'./{txt_normalize(text, 50)}.{l}.wav'), l, t)
+    run(text, o or Path(f'./{txt_normalize(text, 39)}.{l}.wav'), l, t)
 
 if __name__ == '__main__':
     args = handle_input(
