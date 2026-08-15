@@ -1,4 +1,4 @@
-import re
+import re, unicodedata
 
 def filter_bad_words(texts: list[str], json_data:dict) -> list[str]:
     if not json_data: return texts
@@ -52,7 +52,8 @@ def convert_srt(srt_content: str) -> list[dict]:
                     "text": "\n".join(lines[2:]).strip()
                 })
     return result
-def str2bool(v):
+def str2bool(v: str|bool) -> bool:
 	if isinstance(v,bool):return v
 	if v.lower()in('yes','true','t','y','1'):return True
-	elif v.lower()in('no','false','f','n','0'):return False
+	elif v.lower()in('no','false','f','n','0','none','underfined'):return False
+def txt_normalize(text:str,sub:int=0):nfkd_form=unicodedata.normalize('NFKD',text);text_no_accent=''.join([c for c in nfkd_form if not unicodedata.combining(c)]);text_lower=text_no_accent.lower();clean_text=re.sub('[^a-z0-9]+','_',text_lower);return clean_text.strip('_')[:sub] if sub else clean_text.strip('_')
