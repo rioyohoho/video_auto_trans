@@ -1,4 +1,6 @@
+assets/audio-models
+assets/_current_key
+assets/viXTTS
+
 __pycache__
-audio-models
-_curren_key
 *.ttf

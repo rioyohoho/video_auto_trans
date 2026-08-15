@@ -10,6 +10,7 @@ P_DIR = Path(env('PATH_DIR'))
 class ext:
     AUDIO = ('.mp3','.m4a','.wav','.flac','.aac')
     VIDEO = ('.mp4','.mkv','.avi','.mov')
+    DOC = ('.json', '.txt')
 class aud(Enum):
     speechs = float(env('AUD_SPEECHS', 1.0))
     vocal = float(env('AUD_VOCAL', .0))
@@ -24,6 +25,7 @@ UVR_DIR_PATH = env_p(env('UVR_DIR_PATH', 'assets/audio-models'), PATH_BASE)
 
 XTTS_REPO_ID = env('XTTS_REPO_ID','thinhlpg/viXTTS')
 XTTS_DIR_PATH = env_p(env('XTTS_DIR_PATH','assets/viXTTS'), PATH_BASE)
+XTTS_TMP_VOICE = env_p(env('XTTS_TMP_VOICE', 'assets/temple.wav'), PATH_BASE)
 
 GEMINI_MODEL = env('GEMINI_MODEL', 'gemini-3-flash-preview')
 KEY_STATUS_PATH = env_p(env('KEY_STATUS_PATH','assets/_curren_key'), PATH_BASE)
