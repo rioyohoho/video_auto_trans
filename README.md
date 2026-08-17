@@ -50,7 +50,7 @@ Default --language **[.env:LANGS](.env#24)** *or* **[src/configuration.py:LANGS]
   <tr>
     <td width="30%" valign="top">
       <a href="https://youtube.com/shorts/aYZv6VuAA9U" target="_blank">
-        <img src="https://github.com/user-attachments/assets/5e4e8a44-1774-4a5a-a48b-965f63104cc7" width="100%" />
+        <img src="https://github.com/user-attachments/assets/5e4e8a44-1774-4a5a-a48b-965f63104cc7" height="300px" />
       </a>
     </td>
     <td width="70%" valign="top">
