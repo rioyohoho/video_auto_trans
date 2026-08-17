@@ -53,9 +53,7 @@ Default --language **[.env:LANGS](.env#20)** *or* **[src/configuration.py:LANGS]
         <img src="https://github.com/user-attachments/assets/5e4e8a44-1774-4a5a-a48b-965f63104cc7" width="100%" />
       </a>
     </td>
-<<<<<<< HEAD
   </tr>
-
   <tr>
     <td width="70%" valign="top" colspan="1">
 
@@ -71,19 +69,6 @@ Default --language **[.env:LANGS](.env#20)** *or* **[src/configuration.py:LANGS]
     </td>
     <td>
       python s0_demucs.py -i "D:/test.mp4" #"D:/test.mp3"
-=======
-    <td width="70%" valign="top">
-      <table>
-        <tr><th>Name</th><th>Cmd</th></tr>
-        <tr><td><b>Default</b></td><td><code>python s0_demucs.py</code></td></tr>
-      </table>
-      <table> 
-        <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
-        <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/videos/test.mp4"</td></tr>
-        <tr><td>output path</td><td>-o</td><td>--output</td><td>-o "D:/videos/test"</td></tr>
-      </table>
-      <pre><code>python s0_demucs.py -i "D:/test.mp4" #"D:/test.mp3"</code></pre>
->>>>>>> b74aecfa87e3002dda26b08969c14eaf1cc9346a
     </td>
   </tr>
 </table>
