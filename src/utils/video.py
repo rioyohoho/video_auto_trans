@@ -14,11 +14,10 @@ def extract_audio(video_path: Path, suffix=".m4a") -> Path:
     )
     return output
 
-def get_media_duration(path: str) -> float:
-	cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', str(path)]
-	result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-	No = result.stdout.strip()
-	return float(No if No != 'N/A' else '.0')
+def get_media_duration(path):
+	cmd=['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(path)]
+	try:result=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=True);duration_str=result.stdout.strip();return float(duration_str if duration_str and duration_str!='N/A'else .0)
+	except subprocess.CalledProcessError as e:print(f"--- FFPROBE ERROR ---");print(f"Command: {" ".join(cmd)}");print(f"Exit Code: {e.returncode}");print(f"Stderr: {e.stderr.strip()}");raise
 
 def get_video_size(src: Path) -> tuple[int, int]:
     """ ### return: x,y"""
