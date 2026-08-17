@@ -100,3 +100,52 @@ Default --language **[.env:LANGS](.env#24)** *or* **[src/configuration.py:LANGS]
         </td>
     </tr>
 </table>
+
+### Transcribe & Generate SRT by word count
+<table style="table-layout: fixed; width: 100%; border: none;">
+    <tr>
+        <td style="width: 300px; min-width: 300px; vertical-align: top;">
+            <a href="https://youtube.com/shorts/YeSD_WHbpSg">
+                <img src="https://github.com/user-attachments/assets/c44706bd-4c47-481f-81e7-1859644e8763" height="300px" style="display: block;" />
+            </a>
+        </td>
+        <td style="vertical-align: top; padding-left: 15px;">
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>Name</th><th>Cmd</th></tr>
+                <tr><td><b>Default</b></td><td><code>python s4_transcribe.py</code></td></tr>
+            </table>
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
+                <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/audio.mp3"</td></tr>
+                <tr><td>language</td><td>-l</td><td>--language</td><td>-l "vi,en" <i>or</i> -l "vi"</td></tr>
+                <tr><td>words</td><td>-w</td><td>--words</td><td>-w 1 <i>or</i> -w 10</td></tr>
+                <tr><td>beam size</td><td>-c-bs</td><td>--beam_size</td><td>-c-bs 5</td></tr>
+                <tr><td>word timestamps</td><td>-c-wt</td><td>--word_timestamps</td><td>-c-wt True</td></tr>
+                <tr><td>condition on previous text</td><td>-c-copt</td><td>--condition_on_previous_text</td><td>-c-copt False</td></tr>
+                <tr><td>vad filter</td><td>-c-vf</td><td>--vad_filter</td><td>-c-vf True</td></tr>
+            </table>
+            <pre style="white-space: pre-wrap; word-break: break-all; background: #f6f8fa; padding: 10px; border-radius: 6px;"><code>python s3.2_srt.py -i "D:\test\test.vi.mp3" -w 1 -c-vf 0</code></pre>
+        </td>
+    </tr>
+</table>
+
+### Video Rendering & Complex Processing
+<table style="table-layout: fixed; width: 100%; border: none;">
+    <tr>
+        <td style="width: 300px; min-width: 300px; vertical-align: top;">
+            <video src="./assets/demo_s5_video_complex.mp4" width="100%" controls style="display: block;"></video>
+        </td>
+        <td style="vertical-align: top; padding-left: 15px;">
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>Name</th><th>Cmd</th></tr>
+                <tr><td><b>Default</b></td><td><code>python s5_video_complex.py</code></td></tr>
+            </table>
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
+                <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/videos/test.mp4"</td></tr>
+                <tr><td>language</td><td>-l</td><td>--language</td><td>-l "vi,en" <i>or</i> -l "vi"</td></tr>
+            </table>
+            <pre style="white-space: pre-wrap; word-break: break-all; background: #f6f8fa; padding: 10px; border-radius: 6px;"><code>python D:\dev\py\video_h_complex.py -i "D:\test.mp4"</code></pre>
+        </td>
+    </tr>
+</table>
