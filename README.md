@@ -58,7 +58,7 @@ Default --language **[.env:LANGS](.env#20)** *or* **[src/configuration.py:LANGS]
         <tr><th>Name</th><th>Cmd</th></tr>
         <tr><td><b>Default</b></td><td><code>python s0_demucs.py</code></td></tr>
       </table>
-      <table>
+      <table> 
         <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
         <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/videos/test.mp4"</td></tr>
         <tr><td>output path</td><td>-o</td><td>--output</td><td>-o "D:/videos/test"</td></tr>
