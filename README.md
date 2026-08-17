@@ -49,11 +49,11 @@ Default --language **[.env:LANGS](.env#24)** *or* **[src/configuration.py:LANGS]
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
         <td>
-            <a href="https://youtube.com/shorts/aYZv6VuAA9U"><img src="https://github.com/user-attachments/assets/4802c163-bd40-4556-868c-9d5a9069a7d6" height="300px" style="display: block;"></a>
-        </td>
-        <td>
             <table><tr><th>Name</th><th>Cmd</th></tr><tr><td><b>Default</b></td><td><code>python s0_demucs.py</code></td></tr></table>
             <table><tr><th>& Params</th><th>short</th><th>name</th><th>EX</th></tr><tr><td>input</td><td>-i</td><td>--input</td><td>-i "D:/videos"</td></tr><tr><td>output</td><td>-o</td><td>--output</td><td>-o "D:/videos/test"</td></tr></table>
+        </td>
+        <td>
+            <a href="https://youtube.com/shorts/aYZv6VuAA9U"><img src="https://github.com/user-attachments/assets/4802c163-bd40-4556-868c-9d5a9069a7d6" height="300px" style="display: block;"></a>
         </td>
     </tr>
 </table>
@@ -66,11 +66,11 @@ python s0_demucs.py -i "D:/test.mp4"
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
         <td>
-            <a href="https://youtube.com/shorts/UN9BrWDKwx4"><img src="https://github.com/user-attachments/assets/5dbf008a-d6a7-46d9-b26a-a6c8f33715de" height="300px" style="display: block;"></a>
-        </td>
-        <td>
             <table><tr><th>Name</th><th>Cmd</th></tr><tr><td><b>Default</b></td><td><code>python s1_transcribe.py</code></td></tr></table>
             <table><tr><th>& Params</th><th>short</th><th>name</th><th>EX</th></tr><tr><td>input</td><td>-i</td><td>--input</td><td>-i "D:/videos"</td></tr><tr><td>beam</td><td>-c-bs</td><td>--beam_size</td><td>-c-bs 5</td></tr><tr><td>vad</td><td>-c-vf</td><td>--vad_filter</td><td>-c-vf True</td></tr></table>
+        </td>
+        <td>
+            <a href="https://youtube.com/shorts/UN9BrWDKwx4"><img src="https://github.com/user-attachments/assets/5dbf008a-d6a7-46d9-b26a-a6c8f33715de" height="300px" style="display: block;"></a>
         </td>
     </tr>
 </table>
@@ -83,11 +83,11 @@ python s1_transcribe.py -i "D:/test.mp4"
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
         <td>
-            <a href="https://youtube.com/shorts/REFQ3Kc4JwI"><img src="https://github.com/user-attachments/assets/1adf5781-6236-4c71-b241-5bcc99bbad72" height="300px" style="display: block;"></a>
-        </td>
-        <td>
             <table><tr><th>Name</th><th>Cmd</th></tr><tr><td><b>Default</b></td><td><code>python s2_translate.py</code></td></tr></table>
             <table><tr><th>& Params</th><th>short</th><th>name</th><th>EX</th></tr><tr><td>input</td><td>-i</td><td>--input</td><td>-i "D:/data.json"</td></tr><tr><td>lang</td><td>-l</td><td>--language</td><td>-l "vi"</td></tr></table>
+        </td>
+        <td>
+            <a href="https://youtube.com/shorts/REFQ3Kc4JwI"><img src="https://github.com/user-attachments/assets/1adf5781-6236-4c71-b241-5bcc99bbad72" height="300px" style="display: block;"></a>
         </td>
     </tr>
 </table>
@@ -99,11 +99,6 @@ python s2_translates.py -i "D:/test/test.json"
 ### Text to AI Speech (XTTS)
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
-        <td>
-            <a href="https://youtube.com/shorts/ezabDkk0pxs">
-                <img src="https://github.com/user-attachments/assets/04fde322-4991-4ba7-af98-b4aa21e88498" height="300px" style="display: block;" />
-            </a>
-        </td>
         <td>
             <table>
                 <tr><th>Name</th><th>Cmd</th></tr>
@@ -117,6 +112,11 @@ python s2_translates.py -i "D:/test/test.json"
                 <tr><td>language</td><td>-l</td><td>--language</td><td>-l "vi" <i>or</i> -l "en"</td></tr>
             </table>
         </td>
+        <td>
+            <a href="https://youtube.com/shorts/ezabDkk0pxs">
+                <img src="https://github.com/user-attachments/assets/04fde322-4991-4ba7-af98-b4aa21e88498" height="300px" style="display: block;" />
+            </a>
+        </td>
     </tr>
 </table>
 
@@ -127,11 +127,6 @@ python s3.1_AI_speechs.py -l "vi" -o "./test.wav" -t "assets/tmp_voices/Adam.mp3
 ### Transcribe & Generate SRT by word count
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
-        <td>
-            <a href="https://youtube.com/shorts/YeSD_WHbpSg">
-                <img src="https://github.com/user-attachments/assets/c44706bd-4c47-481f-81e7-1859644e8763" height="300px" style="display: block;" />
-            </a>
-        </td>
         <td>
             <table>
                 <tr><th>Name</th><th>Cmd</th></tr>
@@ -148,6 +143,11 @@ python s3.1_AI_speechs.py -l "vi" -o "./test.wav" -t "assets/tmp_voices/Adam.mp3
                 <tr><td>vad filter</td><td>-c-vf</td><td>--vad_filter</td><td>-c-vf True</td></tr>
             </table>
         </td>
+        <td>
+            <a href="https://youtube.com/shorts/YeSD_WHbpSg">
+                <img src="https://github.com/user-attachments/assets/c44706bd-4c47-481f-81e7-1859644e8763" height="300px" style="display: block;" />
+            </a>
+        </td>
     </tr>
 </table>
 
@@ -159,11 +159,6 @@ python s3.2_srt.py -i "D:\test\test.vi.mp3" -w 1 -c-vf 0
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
         <td>
-            <a href="https://youtube.com/shorts/YeSD_WHbpSg">
-                <img src="" alt="Video complex" />
-            </a>
-        </td>
-        <td>
             <table>
                 <tr><th>Name</th><th>Cmd</th></tr>
                 <tr><td><b>Default</b></td><td><code>python s5_video_complex.py</code></td></tr>
@@ -173,6 +168,11 @@ python s3.2_srt.py -i "D:\test\test.vi.mp3" -w 1 -c-vf 0
                 <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/videos/test.mp4"</td></tr>
                 <tr><td>language</td><td>-l</td><td>--language</td><td>-l "vi,en" <i>or</i> -l "vi"</td></tr>
             </table>
+        </td>
+        <td>
+            <a href="https://youtube.com/shorts/YeSD_WHbpSg">
+                <img src="" alt="Video complex" />
+            </a>
         </td>
     </tr>
 </table>
