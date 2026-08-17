@@ -16,7 +16,7 @@ def extract_audio(video_path: Path, suffix=".m4a") -> Path:
 
 def get_media_duration(path):
     p=Path(path)
-    if not p.exists():raise FileNotFoundError(f"File not found: {p.resolve()}")
+    if not p.exists(): return .0
     cmd=['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(p)]
     try:
         res=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,check=True)
