@@ -24,7 +24,12 @@ def _exec_str(text:str,o:Path,l:str=TAR_LANG,t:Path=XTTS_TMP_VOICE):
 	run(text,o or Path(f'./{txt_normalize(text,39)}.{l}.wav'),l,t)
 
 if __name__=='__main__':
-	args=handle_input(agr(('-i','--input'),type=str,required=False,default=P_DIR),agr(('-o','--output'),type=str,required=False,default=''),agr(('-t','--temple'),type=str,required=False,default=XTTS_TMP_VOICE),agr(('-l','--language'),type=str,required=False,default='en'))
+	args=handle_input(
+		agr(('-i','--input'),type=str,required=False,default=P_DIR),
+		agr(('-o','--output'),type=str,required=False,default=''),
+		agr(('-t','--temple'),type=str,required=False,default=XTTS_TMP_VOICE),
+		agr(('-l','--language'),type=str,required=False,default='en')
+	)
 	i,o,t,l=str(args.input),str(args.output),Path(args.temple),str(args.language)
 	op=Path(o) if o else None
 	if not t.absolute(): t=PATH_BASE/t
