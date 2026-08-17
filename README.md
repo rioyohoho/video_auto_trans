@@ -44,29 +44,30 @@ __[configuration](src/configuration.py)__ -
 __[enviroments](.env)__ <br>
 Default --input folder **[.env:PATH_DIR](.env#1)** *or* **[src/configuration.py:P_DIR](src/configuration.py#9)** <br>
 Default --language **[.env:LANGS](.env#20)** *or* **[src/configuration.py:LANGS](src/configuration.py#28)**
-<div style="display: flex; gap: 20px; align-items: flex-start;">
-<div style="flex: 0 0 280px; aspect-ratio: 9/18;">
-<iframe src="https://drive.google.com/file/d/1jzyeufpEGw1OZX12H1qod7t-K5Vfu9wl/view?usp=sharing" width="100%" height="100%" allow="autoplay" frameborder="0" style="border-radius: 8px;"></iframe>
-</div>
-<div style="flex: 1;">
 
 ### Demucs audios
+<table>
+  <tr>
+    <td width="30%" valign="top">
+      <a href="https://drive.google.com/file/d/1jzyeufpEGw1OZX12H1qod7t-K5Vfu9wl/view?usp=sharing" target="_blank">
+        <img src="https://lh3.googleusercontent.com/d/1jzyeufpEGw1OZX12H1qod7t-K5Vfu9wl" width="100%" />
+      </a>
+    </td>
+    <td width="70%" valign="top">
+      <table>
+        <tr><th>Name</th><th>Cmd</th></tr>
+        <tr><td><b>Default</b></td><td><code>python s0_demucs.py</code></td></tr>
+      </table>
+      <table>
+        <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
+        <tr><td>input path</td><td>-i</td><td>--input</td><td>-i "D:/videos" <i>or</i> -i "D:/videos/test.mp4"</td></tr>
+        <tr><td>output path</td><td>-o</td><td>--output</td><td>-o "D:/videos/test"</td></tr>
+      </table>
+      <pre><code>python s0_demucs.py -i "D:/test.mp4" #"D:/test.mp3"</code></pre>
+    </td>
+  </tr>
+</table>
 
-| Name | Cmd |
-| :--- | :--- |
-| **Default** | `python s0_demucs.py` |
-
-| **& Params** | short | name | EX |
-| :--- | :--- | :--- | :--- |
-| input path | -i | --input | -i "D:/videos" *or* -i "D:/videos/test.mp4" |
-| output path | -o | --output | -o "D:/videos/test" |
-
-```bash
-python s0_demucs.py -i "D:/test.mp4" #"D:/test.mp3"
-```
-
-</div>
-</div>
 ### Transcribe
 | Name | Cmd  |
 | :--- | :--- |
