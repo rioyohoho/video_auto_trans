@@ -5,7 +5,9 @@ from TTS.tts.models.xtts import Xtts
 import TTS.tts.layers.xtts.tokenizer as xtts_tok
 from huggingface_hub import snapshot_download
 from src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
-xtts_tok.VoiceBpeTokenizer.preprocess_text=lambda self,txt,lang:txt.strip()
+from src.utils import vi_norm
+
+xtts_tok.VoiceBpeTokenizer.preprocess_text=lambda self,txt,lang:vi_norm(txt) if lang=='vi' else txt.strip()
 class XTTSProcessor:
 	_inst=None
 	def __new__(cls,*args,**kwargs):
@@ -27,11 +29,12 @@ class XTTSProcessor:
 		self.m=Xtts.init_from_config(cfg)
 		self.m.load_checkpoint(cfg,checkpoint_dir=self.ckpt,eval=True)
 		self.m.to(self.dev)
-		self.m.tokenizer.preprocess_text=lambda txt,lang:txt.strip()
+		self.m.tokenizer.preprocess_text=lambda txt,lang:vi_norm(txt) if lang=='vi' else txt.strip()
 		return self.m
 	def _tlen(self,txt:str,lang:str)->int:
 		return len(self.get_model().tokenizer.encode(txt,lang=lang))
 	def split_text_by_tokens(self,text:str,lang:str,mt:int=200)->List[str]:
+		text=vi_norm(text) if lang=='vi' else text
 		c,cur,cl=[],'',0
 		for s in re.split(r'(?<=[.!?])\s+',text):
 			sl=self._tlen(s,lang)
@@ -53,8 +56,9 @@ class XTTSProcessor:
 		m,res=self.get_model(),[]
 		gl,se=m.get_conditioning_latents(audio_path=tmp_voice,gpt_cond_len=m.config.gpt_cond_len,max_ref_length=m.config.max_ref_len,sound_norm_refs=m.config.sound_norm_refs)
 		for t in texts:
+			t=vi_norm(t) if language=='vi' else t
 			if not t.strip(): continue
-			kargs=dict(text=t,gpt_cond_latent=gl,speaker_embedding=se,temperature=0.3,length_penalty=1.0,repetition_penalty=10.0,top_k=30,top_p=0.85,enable_text_splitting=False,language=language)
+			kargs=dict(text=t,gpt_cond_latent=gl,speaker_embedding=se,temperature=0.1,length_penalty=1.0,repetition_penalty=10.0,top_k=20,top_p=0.8,enable_text_splitting=False,language=language)
 			o=m.inference(**kargs)
 			w=torch.tensor(o['wav'])
 			res.append(w.unsqueeze(0) if w.dim()==1 else w)
