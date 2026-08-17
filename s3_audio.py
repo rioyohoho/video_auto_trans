@@ -44,7 +44,9 @@ def _exec_json(x_langs: tuple[tuple[Path, float, float, float, str]], mixes_audi
                 tabular_data=[astuple(d) for d in current_mixes], tablefmt="grid"
             ))
             txt.cyan(output)
-            mdl.mix_audio_files(current_mixes, Path(output))
+            try:
+                mdl.mix_audio_files(current_mixes, Path(output))
+            except Exception as e: txt.yellow(f'Mixing audio files: {e}')
 
 if __name__ == '__main__':
     mixes = [
