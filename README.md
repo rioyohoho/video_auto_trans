@@ -91,12 +91,23 @@ Default --language **[.env:LANGS](.env#24)** *or* **[src/configuration.py:LANGS]
 <table style="table-layout: fixed; width: 100%; border: none;">
     <tr>
         <td style="width: 300px; min-width: 300px; vertical-align: top;">
-            <a href="https://youtube.com/shorts/ezabDkk0pxs"><img src="https://github.com/user-attachments/assets/04fde322-4991-4ba7-af98-b4aa21e88498" height="300px" style="display: block;"></a>
+            <a href="https://youtube.com/shorts/ezabDkk0pxs">
+                <img src="https://github.com/user-attachments/assets/04fde322-4991-4ba7-af98-b4aa21e88498" height="300px" style="display: block;" />
+            </a>
         </td>
         <td style="vertical-align: top; padding-left: 15px;">
-            <table style="width: 100%; margin-bottom: 10px;"><tr><th>Name</th><th>Cmd</th></tr><tr><td><b>Default</b></td><td><code>python s3.1_AI_speechs.py</code></td></tr></table>
-            <table style="width: 100%; margin-bottom: 10px;"><tr><th>& Params</th><th>short</th><th>name</th><th>EX</th></tr><tr><td>input</td><td>-i</td><td>--input</td><td>-i "Xin chào"</td></tr><tr><td>template</td><td>-t</td><td>--temple</td><td>-t "voice.wav"</td></tr></table>
-            <pre style="white-space: pre-wrap; word-break: break-all; background: #f6f8fa; padding: 10px; border-radius: 6px;"><code>python s3.1_AI_speechs.py -l "vi" -o "./test.wav" -t "assets/Adam.mp3" -i "Xin chào, đây là giọng nói AI thử nghiệm."</code></pre>
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>Name</th><th>Cmd</th></tr>
+                <tr><td><b>Default</b></td><td><code>python s3.1_AI_speechs.py</code></td></tr>
+            </table>
+            <table style="width: 100%; margin-bottom: 10px;">
+                <tr><th>&amp; Params</th><th>short</th><th>name</th><th>EX</th></tr>
+                <tr><td>input path / text</td><td>-i</td><td>--input</td><td>-i "D:/data.json" <i>or</i> -i "Xin chào bạn"</td></tr>
+                <tr><td>output path</td><td>-o</td><td>--output</td><td>-o "./output.wav"</td></tr>
+                <tr><td>template voice</td><td>-t</td><td>--temple</td><td>-t "D:/samples/voice.wav"</td></tr>
+                <tr><td>language</td><td>-l</td><td>--language</td><td>-l "vi" <i>or</i> -l "en"</td></tr>
+            </table>
+            <pre style="white-space: pre-wrap; word-break: break-all; background: #f6f8fa; padding: 10px; border-radius: 6px;"><code>python s3.1_AI_speechs.py -l "vi" -o "./test.wav" -t "assets/tmp_voices/Adam.mp3" -i "Xin chào, đây là giọng nói AI thử nghiệm."</code></pre>
         </td>
     </tr>
 </table>
