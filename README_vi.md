@@ -1,7 +1,3 @@
-Dưới đây là tài liệu README chi tiết và khách quan cho bộ 4 công cụ xử lý đa phương tiện (âm thanh, video và phụ đề) dựa trên nền tảng PyQt6 và FFmpeg.
-
----
-
 # Multimedia Processing Tools Suite
 
 Bộ công cụ này bao gồm 4 ứng dụng giao diện trực quan (GUI) được phát triển bằng ngôn ngữ Python, thư viện đồ họa **PyQt6** và bộ công cụ xử lý đa phương tiện **FFmpeg**. Các công cụ này được thiết kế để hỗ trợ các tác vụ chuyên biệt như: kiểm thử giọng nói nhân tạo (TTS), tạo vùng làm mờ xóa phụ đề (De-subtitles), trộn âm thanh đa băng tần (Audio Mixing) và thay đổi kích thước video hàng loạt (Batch Video Resizing).
