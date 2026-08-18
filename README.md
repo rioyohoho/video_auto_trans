@@ -1,6 +1,9 @@
 # video_auto_trans
 This project utilizes AI models to develop various functionalities including audio, text-to-speech, speech-to-text, and translation.
 
+## Branch
+ 1. [Crawl Douyin videos](https://github.com/rioyohoho/video_auto_trans/tree/crawl) _crawl all video of list or user_
+ 2. [UI Controller](https://github.com/rioyohoho/video_auto_trans/tree/UI-controller) _for render, delogo, add subtitles, add audio, innert image,gif ...etc_ into new video
 
 ## Requirements
  - Python +3.10
