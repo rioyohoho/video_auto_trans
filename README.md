@@ -1,3 +1,5 @@
+## [HƯỚNG DẪN TIẾNG VIỆT](./README.vi.md)
+
 # Multimedia Processing Tools Suite
 
 This toolkit comprises four graphical user interface (GUI) applications developed in Python using **PyQt6** and the **FFmpeg** multimedia framework. These tools are designed to streamline specialized workflows, including Text-to-Speech (TTS) voice testing, subtitle removal mask generation (De-subtitling), multi-track audio mixing, and batch video resizing.
