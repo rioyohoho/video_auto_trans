@@ -1,7 +1,3 @@
-Dưới đây là tài liệu hướng dẫn sử dụng (README) cho bộ công cụ quản lý và xử lý dữ liệu video từ Douyin của bạn. Bộ công cụ này hỗ trợ quy trình từ bước lấy link, tải xuống, dịch thuật tiêu đề, cho đến đổi tên và tổ chức thư mục lưu trữ.
-
----
-
 # Quy Trình Quản Lý Và Xử Lý Video Douyin
 
 Bộ công cụ này cung cấp một quy trình khép kín giúp bạn lấy dữ liệu video từ Douyin, dịch thuật tiêu đề, tải xuống hàng loạt bằng IDM, đổi tên file tự động và sắp xếp tệp tin vào các thư mục tương ứng.

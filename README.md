@@ -1,6 +1,4 @@
-Below is the user guide (README) for your Douyin video data management and processing toolkit. This toolkit supports the entire pipeline from link extraction, batch downloading, title translation, to file renaming and directory organization.
-
----
+## [HƯỚNG DẪN TIẾNG VIỆT](./README.vi.md)
 
 # Douyin Video Management and Processing Pipeline
 
