@@ -9,15 +9,15 @@ class cmd:
         call = os.path.join(BASE_DIR,call)
         subprocess.run([sys.executable,call,*agrs], cwd=BASE_DIR)
 
-from src.configuration import TAR_LANG,LANGS
+from src.configuration import TAR_LANG,LANGS,XTTS_TMP_VOICE
 MENU = [
     ["Exiting program", None],
     ["Separation", "s0_demucs.py"],
     ["Transcribe", "s1_transcribe.py",'-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
-    ["Translate Subtitles", "s2_translates.py", f'-l {','.join(LANGS)}', '-s True'],
-    ["Text to Speech", "s3_audio.py", f'-l {','.join(LANGS)}', '-p 1.39', '-a 1.25', '-v 2.0'],
-    ["Text to AI Speech - XTTS", "s3.1_AI_speechs.py", f'-l {TAR_LANG}','-t XTTS_TMP_VOICE', '-mi true'],
-    ["Word-Level SRT Generation", "s3.2_srt.py", '-l "vi,en"', '-w 1', '-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
+    ["Translate Subtitles", "s2_translates.py", f'-l "{','.join(LANGS)}"', '-s True'],
+    ["Text to Speech", "s3_audio.py", f'-l "{','.join(LANGS)}"', '-p 1.39', '-a 1.25', '-v 2.0'],
+    ["Text to AI Speech - XTTS", "s3.1_AI_speechs.py", f'-l {TAR_LANG}', f'-t {XTTS_TMP_VOICE}', '-mi true'],
+    ["Word-Level SRT Generation", "s3.2_srt.py", f'-l "{','.join(LANGS)}"', '-w 1', '-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
 ]
 _line = '='*95
 MENU_TITLE=f"""{_line}
