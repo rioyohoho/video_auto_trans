@@ -4,7 +4,8 @@ import torchaudio
 from pathlib import Path
 from tabulate import tabulate
 from src.modules.speech_ai import XTTSProcessor
-from src.utils import ext, txt, file, agr, r_json, listFilter, handle_input, txt_normalize, cal_time, str2bool, progress
+from src.enties import agr
+from src.utils import ext, txt, file, r_json, listFilter, handle_input, txt_normalize, cal_time, str2bool, progress
 from src.configuration import PATH_BASE, P_DIR, TAR_LANG, XTTS_TMP_VOICE
 
 P = os.path

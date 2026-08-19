@@ -3,9 +3,9 @@ from pathlib import Path
 from tabulate import tabulate
 from dataclasses import astuple
 from src.modules import speech as mdl, demucs
-from src.enties import Audio,TrackAudio
+from src.enties import Audio,TrackAudio,agr
 from src.utils import ext,txt,r_json,listFilter
-from src.utils import listFilter, handle_input, get_media_duration, agr
+from src.utils import listFilter, handle_input, get_media_duration
 from src.configuration import P_DIR,LANGS,MAP_LANGS
 P = os.path
 

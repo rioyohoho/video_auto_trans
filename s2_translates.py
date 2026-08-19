@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 from dataclasses import asdict,astuple
-from src.utils import txt, agr, ext, r_text, w_text, r_json, w_json, \
+from src.enties import agr
+from src.utils import txt, ext, r_text, w_text, r_json, w_json, \
     cal_time, filter_bad_words, to_srt, srt_to, handle_input, listFilter
 from src.enties import Transcribe
 from src.modules.translate import text_translation, ai_translation, translates

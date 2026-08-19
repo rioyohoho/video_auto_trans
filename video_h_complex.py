@@ -2,7 +2,8 @@ import os,re,sys,math,time,subprocess
 from pathlib import Path
 from typing import Optional,List, get_type_hints as N,get_origin as O,get_args as P
 from dataclasses import dataclass,field,fields as L,is_dataclass as M
-from src.utils import agr,ext,txt,logger as lg, get_media_duration, get_video_size,\
+from src.enties import agr
+from src.utils import ext,txt,logger as lg, get_media_duration, get_video_size,\
 	handle_input, listFilter, r_json
 from src.configuration import TAR_LANG, P_DIR, LANGS
 import torch

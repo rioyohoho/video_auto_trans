@@ -1,4 +1,5 @@
-from src.utils import agr,txt,ext,handle_input,is_ext,listFilter
+from src.enties import agr
+from src.utils import txt,ext,handle_input,is_ext,listFilter
 from src.modules import transcribe, demucs
 from src.utils.text import str2bool
 from src.configuration import P_DIR

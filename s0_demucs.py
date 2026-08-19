@@ -1,6 +1,7 @@
 from pathlib import Path
 import os,sys,traceback
-from src.utils import txt,ext,agr,cal_time,is_ext,listFilter,handle_input
+from src.enties import agr
+from src.utils import txt,ext,cal_time,is_ext,listFilter,handle_input
 from src.configuration import P_DIR
 from src.modules import demucs
 

@@ -1,10 +1,10 @@
 import re,sys
 from pathlib import Path
 from dataclasses import astuple,asdict
-from src.enties import Transcribe
+from src.enties import Transcribe, agr
 from src.utils.text import str2bool
 from src.modules.transcribe import mdl,C as trC
-from src.utils import txt, agr, ext, r_json, w_json, w_text, to_srt, handle_input, listFilter
+from src.utils import txt, ext, r_json, w_json, w_text, to_srt, handle_input, listFilter
 from src.configuration import P_DIR, LANGS, MAP_LANGS
 
 def _exec(path:Path, lang:str, words=1):
