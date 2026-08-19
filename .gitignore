@@ -2,7 +2,10 @@ assets/audio-models
 assets/_current_key
 assets/viXTTS
 
-test/*
+test
+build
+dist
+.spec
 
 __pycache__
 *.ttf
