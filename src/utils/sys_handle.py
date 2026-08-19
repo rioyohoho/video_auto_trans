@@ -1,6 +1,6 @@
 import os,sys,time,subprocess
 from pathlib import Path
-from typing import Callable, Any, Iterable
+from typing import Callable
 from src.configuration import ext
 
 def execute_after_countdown(exec_in=3,exec_sys:str|Callable=lambda:0):
@@ -14,20 +14,8 @@ def execute_after_countdown(exec_in=3,exec_sys:str|Callable=lambda:0):
 exec_in = execute_after_countdown
 
 import argparse
-from dataclasses import dataclass, asdict
-@dataclass
-class agr:
-    name_or_flags: list[str] | str
-    action: str | type[argparse.Action] | None = None
-    nargs: int | str | None = None
-    const: Any = None
-    default: Any = None
-    type: Callable[[str], Any] | None = None
-    choices: Iterable[Any] | None = None
-    required: bool | None = None
-    help: str | None = None
-    metavar: str | tuple[str, ...] | None = None
-    dest: str | None = None
+from dataclasses import  asdict
+from src.enties import agr
 
 def handle_input(*args: agr):
     parser = argparse.ArgumentParser(description=__file__)
