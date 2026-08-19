@@ -10,6 +10,7 @@ P_DIR = Path(env('PATH_DIR'))
 class ext:
     AUDIO = ('.mp3','.m4a','.wav','.flac','.aac')
     VIDEO = ('.mp4','.mkv','.avi','.mov')
+    MEDIA = AUDIO + VIDEO
     DOC = ('.json', '.txt')
 class aud(Enum):
     speechs = float(env('AUD_SPEECHS', 1.0))
