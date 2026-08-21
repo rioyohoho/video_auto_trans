@@ -16,7 +16,7 @@ MENU = [
     ["Transcribe", "s1_transcribe.py",'-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
     ["Translate Subtitles", "s2_translates.py", f'-l "{','.join(LANGS)}"', '-s True'],
     ["Text to Speech", "s3_audio.py", f'-l "{','.join(LANGS)}"', '-p 1.39', '-a 1.25', '-v 2.0'],
-    ["Text to AI Speech - XTTS", "s3.1_AI_speechs.py", f'-l {TAR_LANG}', f'-t {XTTS_TMP_VOICE}', '-mi true'],
+    ["Text to AI Speech - XTTS", "s3.1_AI_speechs.py", f'-l "{TAR_LANG}"', f'-t {XTTS_TMP_VOICE}', '-mi true'],
     ["Word-Level SRT Generation", "s3.2_srt.py", f'-l "{','.join(LANGS)}"', '-w 1', '-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
 ]
 _line = '='*95
@@ -35,6 +35,8 @@ from typing import Callable
 def exec(item:tuple[str,Callable|None], input_path:list[str]|str):
     if not item[1]: sys.exit(0)
     txt.magenta(f"{'\t'*3}{item[0]}")
+    if os.path.isdir(input_path):
+        input_path = [f for f in os.listdir(input_path) if os.path.isfile(os.path.join(input_path, f))]
     if isinstance(input_path,list):
         sz=len(input_path)
         for i,path in enumerate(input_path,1):txt.cyan(f'[{i}/{sz}]: {path}');cmd._run(*item[1:],'-i', path)
@@ -48,8 +50,8 @@ def main():
         if not input_path: input_path = get_input_path(input_path)
         subprocess.call("clear||cls", shell=True)
         txt.cyan(tabulate(
-            headers=['index', 'name', 'execute', *[f'p_{i}' for i in range(1,10,1)]],
-            tabular_data=[[*m[:2],'-i',input_path,*m[2:]] if m[1] else m for m in MENU],
+            headers=['index', 'name', 'execute', *[f'p_{i}' for i in range(1,20,1)]],
+            tabular_data=[[*m[:2],'-i',f'{input_path}\\*',*m[2:]] if m[1] else m for m in MENU],
             tablefmt='grid',showindex=True
         ))
         txt.gray(f'[Active Input] {input_path}')

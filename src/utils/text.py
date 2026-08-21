@@ -57,9 +57,3 @@ def str2bool(v: str|bool) -> bool:
 	if v.lower()in('yes','true','t','y','1'):return True
 	elif v.lower()in('no','false','f','n','0','none','underfined'):return False
 def txt_normalize(text:str,sub:int=0):nfkd_form=unicodedata.normalize('NFKD',text);text_no_accent=''.join([c for c in nfkd_form if not unicodedata.combining(c)]);text_lower=text_no_accent.lower();clean_text=re.sub('[^a-z0-9]+','_',text_lower);return clean_text.strip('_')[:sub] if sub else clean_text.strip('_')
-from num2words import num2words
-def vi_norm(t):
-	t=re.sub(r'(\d+)\s*h(\d+)?',lambda m:f"{num2words(int(m.group(1)),lang='vi')} giờ "+(f"{num2words(int(m.group(2)),lang='vi')} phút" if m.group(2) else ""),t,flags=re.I)
-	t=re.sub(r'\b\d+\b',lambda m:num2words(int(m.group(0)),lang='vi'),t)
-	return re.sub(r'[^\w\s.,!?-]',' ',t).strip()
-

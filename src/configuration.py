@@ -24,8 +24,8 @@ FFMPEG,FFPROBE = env('FFMPEG'),env('FFPROBE')
 UVR_MODEL = env('UVR_MODEL', 'UVR-MDX-NET-Voc_FT.onnx')
 UVR_DIR_PATH = env_p(env('UVR_DIR_PATH', 'assets/audio-models'), PATH_BASE)
 
-XTTS_REPO_ID = env('XTTS_REPO_ID','thinhlpg/viXTTS')
-XTTS_DIR_PATH = env_p(env('XTTS_DIR_PATH','assets/viXTTS'), PATH_BASE)
+XTTS_REPO_ID = env('XTTS_REPO_ID','coqui/XTTS-v2')
+XTTS_DIR_PATH = env_p(env('XTTS_DIR_PATH','assets/voice_model'), PATH_BASE)
 XTTS_TMP_VOICE = env_p(env('XTTS_TMP_VOICE', 'assets/temple.wav'), PATH_BASE)
 
 GEMINI_MODEL = env('GEMINI_MODEL', 'gemini-3-flash-preview')
