@@ -1,3 +1,5 @@
+## [ENGLISH INSTRUCTIONS](./README.md)
+
 # video_auto_trans
 Dự án này ứng dụng các mô hình Trí tuệ Nhân tạo (AI) để cung cấp các giải pháp tự động hóa video và âm thanh toàn diện, bao gồm: tách giọng/nhạc, chuyển văn bản thành giọng nói (Text-to-Speech), nhận diện giọng nói thành văn bản (Speech-to-Text) và dịch thuật tự động.
 
