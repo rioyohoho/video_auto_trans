@@ -1,4 +1,4 @@
-## [HƯỚNG DẪN TIẾNG VIỆT](./README.vi.md)
+# [HƯỚNG DẪN TIẾNG VIỆT](./README.vi.md)
 
 # video_auto_trans
 This project utilizes AI models to develop various functionalities including audio, text-to-speech, speech-to-text, and translation.
