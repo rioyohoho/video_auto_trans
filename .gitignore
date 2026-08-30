@@ -5,6 +5,7 @@ assets/voice_model
 test
 build
 dist
+_curren_key
 .spec
 
 __pycache__
