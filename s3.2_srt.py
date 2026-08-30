@@ -8,7 +8,7 @@ from src.utils import txt, ext, r_json, w_json, w_text, to_srt, handle_input, li
 from src.configuration import P_DIR, LANGS, MAP_LANGS
 
 def _exec(path:Path, lang:str, words=1):
-    print(f'LANG: {lang}, WORDS: {words}', path)
+    txt.yellow(f'LANG: {lang}, WORDS: {words} {path}')
     if not path.exists(): return
     name = path.name.split('.')[0]
     json_path = path.with_name(name+f'{'_'+str(words) if words>0 else ''}.{MAP_LANGS.get(lang, lang)}.json'); jhs = json_path.exists()
