@@ -344,9 +344,9 @@ def video_complex(
 
 def exec(source:Path, name:str, langs:list[str], target:Path=None):
 	if not source or not source.exists(): return 'Source is not exist!'
-	parse = lambda pth,T: callable(txt.green if pth.exists() else txt.gray)(f'READ: {pth}') or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
+	parse = lambda pth,T: (txt.green(f'READ: {pth}') if pth.exists() else txt.gray(f'READ: {pth}')) or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
 	dr = (source.with_suffix('')/name)
-
+	
 	timestamps:Optional[List[E2.Timestamp]]	=	parse(dr.with_suffix('.json'), E2.Timestamp)
 	audios:Optional[List[E2.TsAudio]]		=	[
 		E2.TsAudio(path=p, volume=v)
