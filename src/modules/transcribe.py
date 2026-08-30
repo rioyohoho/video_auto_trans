@@ -13,6 +13,7 @@ class C: #configuration
 	_IS_CUDA = cuda.is_available()
 	DEVICE = "cuda" if _IS_CUDA else "cpu"
 	TYPE = "float16" if _IS_CUDA else "int8"
+	language=None
 	smin=.15
 	smax=3.0
 	beam_size=5
@@ -23,7 +24,7 @@ class C: #configuration
 class mdl: # Models
 	ndigits=3
 	whisper:WhisperModel = cal_time(lambda: WhisperModel(C.MODEL, device=C.DEVICE, compute_type=C.TYPE), 'Load WhisperModel', clear=1)
-	def transcribe(audio_path:str,language:Optional[str]=None)->List[Transcribe]:
+	def transcribe(audio_path:str,language:Optional[str]=C.language)->List[Transcribe]:
 		def r(nf,dg=mdl.ndigits):return round(nf,dg)
 		res,_= mdl.whisper.transcribe(
 			audio_path,
@@ -38,7 +39,7 @@ class mdl: # Models
 			txt=s.text.strip()
 			if txt:segments.append(Transcribe(r(s.start),r(s.end),txt))
 		return segments
-	def transcribe_length(audio_path:str,language:Optional[str]=None,max_words:int=10)->List[Transcribe]:
+	def transcribe_length(audio_path:str,language:Optional[str]=C.language,max_words:int=10)->List[Transcribe]:
 		def r(nf,dg=mdl.ndigits):return round(nf,dg)
 		res,_=mdl.whisper.transcribe(
 			audio_path,
@@ -60,7 +61,7 @@ class mdl: # Models
 						chunk=words[i:i+max_words];chunk_start=chunk[0].start;chunk_end=chunk[-1].end;chunk_text=' '.join([w.word.strip()for w in chunk])
 						if chunk_text:segments.append(Transcribe(r(chunk_start),r(chunk_end),chunk_text))
 		return segments
-	def transcribe_range(audio_path:str,language:Optional[str]=None, min=C.smin, max=C.smax)->List[Transcribe]:
+	def transcribe_range(audio_path:str,language:Optional[str]=C.language, min=C.smin, max=C.smax)->List[Transcribe]:
 		def r(nf,dg=mdl.ndigits):return round(nf,dg)
 		res,_= mdl.whisper.transcribe(
 			audio_path,
@@ -98,11 +99,11 @@ class mdl: # Models
 		return segments
 
 # execute
-def initialization(p_audio:Path, target:Path):
+def initialization(p_audio:Path, target:Path, language:str=None):
 	p_json = (target/target.stem).with_suffix('.json')
 	if p_json.exists(): return
 	p_json.parent.mkdir(parents=True, exist_ok=True)
-	step_1 = lambda: mdl.transcribe(p_audio)
+	step_1 = lambda: mdl.transcribe(p_audio, language=language)
 	data:list[Transcribe] = cal_time(step_1, f'Transcribe: {p_audio}', clear=1,tab=1)
 	w_json(p_json, [asdict(d) for d in data])
 

@@ -6,10 +6,11 @@ from src.configuration import P_DIR
 from pathlib import Path
 import os,sys,traceback
 
-def run(source:Path,output:Path):
+
+def run(source:Path,output:Path,language:str|None=None):
     vocal_path = source.with_suffix('')/(source.stem+f'_{demucs.C.n_voice}.mp3')
     if vocal_path.exists(): source=vocal_path
-    try:transcribe.initialization(p_audio=source,target=output)
+    try:transcribe.initialization(p_audio=source,target=output,language=language)
     except Exception as e: traceback.print_exception(e)
 
 
@@ -18,6 +19,7 @@ if __name__ == '__main__':
     args = [
         agr(('-i', '--input')),
         agr(('-o', '--output')),
+        agr(('-l', '--language'),type=str,default=None),
         agr(('-c-bs', '--beam_size'),type=int),
         agr(('-c-wt', '--word_timestamps'),type=str2bool),
         agr(('-c-copt', '--condition_on_previous_text'),type=str2bool),
