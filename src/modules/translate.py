@@ -11,17 +11,17 @@ def translates(texts: str | list[str], tar_lang=None, from_lang='auto') -> list[
 
 def ai_translation(texts: str | list[str], tar_lang=None, trials=3):
     prompt= f"""
-    You are an professional translator. Use clear and natural language.
-    Translate the following lines into {tar_lang}.
-    
-    Strict Requirements:
-    1. Maintain the specific pitch of the 'general' genre.
-    2. Ensure the output has the same number of lines as the input.
-    3. No explanations or extra text.
+You are an professional translator. Use clear and natural language.
+Translate the following lines into {tar_lang}.
 
-    Content:
-    {"\n".join(texts)}
-    """
+Strict Requirements:
+1. Maintain the specific pitch of the 'general' genre.
+2. Ensure the output has the same number of lines as the input.
+3. No explanations or extra text.
+
+Content:
+{"\n".join(texts)}
+"""
     return request(prompt=prompt, trials=trials, tab=TAB)
 
 from deep_translator import GoogleTranslator
