@@ -1,5 +1,5 @@
 from src.utils import logger as log
-from .useAI import request
+from .googleAI import request
 
 TAB = 3
 def translates(texts: str | list[str], tar_lang=None, from_lang='auto') -> list[str]|str:
