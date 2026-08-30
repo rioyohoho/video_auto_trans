@@ -67,7 +67,6 @@ def request(prompt: str = None, trials = 3, sleep=5, tab = 1):
             else: break
         except errors.ClientError as e:
             log.ln(f'Google AI ClientError ERROR({e.code}): "{e.message}"', log.R, tab)
-            log.ln('USE GoogleTranslator', log.GR, tab)
             data = _load_key_data()
             if current_key in data:
                 data[current_key] = time.time() + T.key_enable_in
