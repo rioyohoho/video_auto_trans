@@ -1,18 +1,17 @@
-import subprocess, json, math, os
+import subprocess, json, math
 from pathlib import Path
-from src import configuration as C
 
-def extract_audio(video_path: Path, suffix=".m4a") -> Path:
-    output = video_path.with_suffix(suffix=suffix)
-    if output.exists(): return output
-    subprocess.run([C.FFMPEG,
-        "-hide_banner", "-loglevel", "error",
-        "-i", str(video_path), "-vn", "-acodec", "copy", str(output)],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    return output
+def extract_audio(video_path,suffix='.m4a',ffmpeg_path='ffmpeg'):
+	output=video_path.with_suffix(suffix)
+	if output.exists():return output
+	probe_cmd=['ffprobe','-v','error','-select_streams','a','-show_entries','stream=index','-of','json',str(video_path)]
+	try:
+		res=subprocess.check_output(probe_cmd,stderr=subprocess.STDOUT)
+		if not json.loads(res).get('streams'):raise ValueError('File không có audio')
+	except(subprocess.CalledProcessError,FileNotFoundError):pass
+	cmd_copy=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-vn','-acodec','copy',str(output)]
+	if subprocess.run(cmd_copy,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0:return output
+	cmd_encode=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-vn','-c:a','aac',str(output)];subprocess.run(cmd_encode,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);return output
 
 def get_media_duration(path):
     p=Path(path)
