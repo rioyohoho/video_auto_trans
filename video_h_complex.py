@@ -8,28 +8,8 @@ from src.utils import ext,txt,logger as lg, get_media_duration, get_video_size,\
 from src.configuration import TAR_LANG, P_DIR, LANGS
 import torch
 
-WITH_MAX_SOURCE=True
 cpu_threads = max(1, int(os.cpu_count() * 0.8)) # 80%
-class MM:
-	o_ff_filter=False
-	ffmpeg_level='error'
-	HARDWARE = [
-		'-c:v', 'hevc_nvenc',
-		'-preset', 'p1',
-		'-rc', 'vbr',
-		'-cq', '32',
-		'-multipass', 'fullres',
-		'-spatial-aq', '1',
-		'-temporal-aq', '1',
-		'-pix_fmt', 'p010le',
-		'-threads', str(cpu_threads)
-	] if torch.cuda.is_available() else [
-		'-c:v', 'libx265',
-		'-preset', 'medium',
-		'-crf', '32',
-		'-pix_fmt', 'yuv420p10le',
-		'-threads', str(cpu_threads)
-	]
+
 class E:
 	class TimelineManager:
 			def __init__(self,ts:list['E2.Timestamp'],sd=0.0):
@@ -342,32 +322,52 @@ def video_complex(
 		if subtitles:p_ass.unlink(True)
 	return target
 
+class MM:
+	o_ff_filter=False
+	ffmpeg_level='error'
+	HARDWARE = [
+		'-c:v', 'hevc_nvenc',
+		'-preset', 'p1',               # P7 là chất lượng cao nhất (Slower/Best Quality)
+		'-rc', 'constqp',              # Chuyển sang ConstQP để có chất lượng đồng đều tốt nhất
+		'-qp', '32',                   # Giá trị QP thấp (18-23) cho chất lượng cực cao (gần như không mất chi tiết)
+		'-multipass', 'fullres',       # Giữ nguyên: Phân tích 2 bước ở độ phân giải đầy đủ
+		'-spatial-aq', '1',            # Giữ nguyên: Tự động phân bổ dữ liệu theo không gian (rất tốt cho chi tiết nhỏ)
+		'-temporal-aq', '1',           # Giữ nguyên: Tự động phân bổ dữ liệu theo thời gian (giảm nhiễu chuyển động)
+		'-pix_fmt', 'p010le',          # Giữ nguyên: Mã hóa 10-bit giúp giảm hiện tượng vỡ màu (banding)
+		'-threads', str(cpu_threads)
+	] if torch.cuda.is_available() else [
+		'-c:v', 'libx265',
+		'-preset', 'medium',
+		'-crf', '32',
+		'-pix_fmt', 'yuv420p10le',
+		'-threads', str(cpu_threads)
+	]
 def exec(source:Path, name:str, langs:list[str], target:Path=None):
 	if not source or not source.exists(): return 'Source is not exist!'
-	parse = lambda pth,T: (txt.green(f'READ: {pth}') if pth.exists() else txt.gray(f'READ: {pth}')) or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
+	parse = lambda pth,T: (txt.green(f'READ: {pth}') if pth.exists() else txt.gray(f'VOID: {pth}')) or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
 	dr = (source.with_suffix('')/name)
 	
 	timestamps:Optional[List[E2.Timestamp]]	=	parse(dr.with_suffix('.json'), E2.Timestamp)
 	audios:Optional[List[E2.TsAudio]]		=	[
 		E2.TsAudio(path=p, volume=v)
 		for (p,v) in [
-			(dr.with_name(f'{name}_music.mp3'), 2.0),
-			(dr.with_name(f'{name}.{TAR_LANG}.mp3'), 2.0)
+			(dr.with_name(f'{name}_music.mp3'), 2.0),			# base music
+			(dr.with_name(f'{name}.{TAR_LANG}.mp3'), 2.0),		# voice translated
+			# (Path(r"MUSIC_PATH"), .5)
 		] if p.exists()
 	]
 	subtitles:Optional[List[E2.TsSubtitle]]	=	parse(dr.with_name('ass_data.json'), E2.TsSubtitle)
 	images:Optional[List[E2.TsImage]]		=	[
-		# E2.TsImage(0,timestamps[-1].end,Path(r"D:\vds\original.gif"),.5,.25, E2.Point(430,768))
+		# E2.TsImage(0,timestamps[-1].end,Path(r"PATH_TO_IMAGE_OR_GIF"),.5,.25, E2.Point(430,768))
 	]
 	blurs:Optional[List[E2.Polygon]]		= 	parse(dr.with_name('blurs.json'), E2.Polygon)
 	target:Optional[Path]					=	dr.with_name(f'{name}_h.mp4')
-
 
 	#=============================================
 	output = video_complex(source, timestamps, audios, subtitles, images, blurs, target)
 	txt.magenta(output)
 	
-
+WITH_MAX_SOURCE=False
 if __name__ == '__main__':
     args = handle_input(
         agr(('-i','--input'), type=str, required=False, default=P_DIR),
