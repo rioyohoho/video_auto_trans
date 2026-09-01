@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from dataclasses import asdict,astuple
+from py.src.utils.sys_handle import is_ext
 from src.enties import agr
 from src.utils import txt, ext, r_text, w_text, r_json, w_json, \
     cal_time, filter_bad_words, to_srt, srt_to, handle_input, listFilter
@@ -67,7 +68,10 @@ if __name__ == '__main__':
                 txt.cyan(f'[{i}/{szd}] : [{j}/{szl}] : [{i+j}/{sz}]')
                 data = file_translate(str(x.with_suffix('.json')),_l)
                 if with_srt: w_text(str(x.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in data]))
-    elif path.is_file() and str(path).endswith('.json'):
+    elif path.is_file():
+        if not is_ext(str(path), ext.VIDEO): 
+            path = path.with_suffix('')/path.stem
+        if not str(path).endswith('.json'): sys.exit(0)
         for _l in langs:
             data = file_translate(inp,_l)
             if with_srt: w_text(str(path.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in data]))
