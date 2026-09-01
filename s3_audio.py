@@ -5,7 +5,7 @@ from dataclasses import astuple
 from src.modules import speech as mdl, demucs
 from src.enties import Audio,TrackAudio,agr
 from src.utils import ext,txt,r_json,listFilter
-from src.utils import listFilter, handle_input, get_media_duration
+from src.utils import is_ext, listFilter, handle_input, get_media_duration
 from src.configuration import P_DIR,LANGS,MAP_LANGS
 P = os.path
 
@@ -32,13 +32,13 @@ def _exec_json(x_langs: tuple[tuple[Path, float, float, float, str]], mixes_audi
     for xls in x_langs:
         if not xls[0].exists(): txt.yellow(f'"{xls[0]}" does not exist!'); continue
         elif run(*xls, False) and mixes_audio:
-            n, _l, _s = str(xls[0]).split('.') 
+            nls = str(xls[0]).split('.') 
             current_mixes = copy.deepcopy(mixes_audio)
-            current_mixes.append(TrackAudio(0, 0, f'.{_l}.mp3', volume=2.0))
+            current_mixes.append(TrackAudio(0, 0, f'.{nls[1]}.mp3', volume=2.0))
             for ma in current_mixes:
-                if not Path(ma.text).is_absolute():ma.text = n + ma.text
+                if not Path(ma.text).is_absolute():ma.text = nls[0] + ma.text
                 ma.snd = ma.end = get_media_duration(ma.text)
-            output = '.'.join([n, MAP_LANGS.get(_l, _l), 'mp3'])
+            output = '.'.join([nls[0], MAP_LANGS.get(nls[1], nls[1]), 'mp3'])
             txt.gray(tabulate(
                 headers=list(vars(current_mixes[0]).keys()),
                 tabular_data=[astuple(d) for d in current_mixes], tablefmt="grid"
@@ -68,5 +68,7 @@ if __name__ == '__main__':
         for i, n in enumerate(listFilter(path, ext.VIDEO), 1):
             x=(path/n);xp=x.with_suffix('')/x.stem
             _exec_json([(xp.with_suffix(f'.{_l}.json'),p,a,v, _l) for _l in l],mixes)
-    elif path.is_file() and str(path).endswith('.json'):
-        _exec_json([(path,p,a,v, _l) for _l in l],mixes)
+    elif path.is_file():
+        if is_ext(str(path), ext.VIDEO): 
+            path = (path.with_suffix('')/path.stem)
+        _exec_json([(path.with_suffix(f'.{_l}.json'),p,a,v, _l) for _l in l],mixes)

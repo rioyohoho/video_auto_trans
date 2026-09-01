@@ -59,21 +59,21 @@ if __name__ == '__main__':
     if not path.exists() or not langs: sys.exit(0)
 
     if path.is_dir():
-        data = listFilter(path, ext.VIDEO)
-        szd,szl=len(data),len(langs);sz=szd*szl
-        for i, v in enumerate(data, 1):
+        i_data = listFilter(path, ext.VIDEO)
+        szd,szl=len(i_data),len(langs);sz=szd*szl
+        for i, v in enumerate(i_data, 1):
             x=(path/v);x=x.with_suffix('')/x.stem
             for j,_l in enumerate(langs, 1):
                 txt.cyan(f'[{i}/{szd}] : [{j}/{szl}] : [{i+j}/{sz}]')
-                data = file_translate(str(x.with_suffix('.json')),_l)
-                if with_srt: w_text(str(x.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in data]))
+                res_data = file_translate(str(x.with_suffix('.json')),_l)
+                if with_srt: w_text(str(x.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in res_data]))
     elif path.is_file():
-        if not is_ext(str(path), ext.VIDEO): 
-            path = path.with_suffix('')/path.stem
+        if is_ext(str(path), ext.VIDEO): 
+            path = (path.with_suffix('')/path.stem).with_suffix('.json')
         if not str(path).endswith('.json'): sys.exit(0)
         for _l in langs:
-            data = file_translate(inp,_l)
-            if with_srt: w_text(str(path.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in data]))
+            res_data = file_translate(str(path),_l)
+            if with_srt: w_text(str(path.with_suffix(f'.{MAP_LANGS.get(_l)}.srt')), to_srt([astuple(d) for d in res_data]))
 
     
 

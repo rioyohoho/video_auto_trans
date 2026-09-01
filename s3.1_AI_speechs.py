@@ -24,7 +24,6 @@ def adjust_speed(wav: torch.Tensor, target_len: int, sr: int = 24000) -> torch.T
 		stretched_spec = torchaudio.functional.phase_vocoder(spec, rate=speed_factor, hop_length=hop_length)
 		return torch.istft(stretched_spec, n_fft=n_fft, hop_length=hop_length, length=target_len)
 	except Exception:
-		# Fallback nội suy tuyến tính nếu phase vocoder lỗi shape
 		return torch.nn.functional.interpolate(wav.unsqueeze(0), size=target_len, mode='linear', align_corners=False).squeeze(0)
 
 def run(text: str, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE)):
