@@ -1,7 +1,7 @@
 import os,time,logging
 from pathlib import Path
 import numpy as np
-import librosa
+from scipy.signal import correlate
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 from src.utils import extract_audio
@@ -15,43 +15,22 @@ class Processor:
         self.separator.load_model(C.mn_audio_separate)
     def _clean(self,orig_p:Path,voc_p:Path,out_m:Path):
         try:
-            y_orig, sr = librosa.load(str(orig_p.resolve()), sr=None, mono=False)
-            y_voc, _ = librosa.load(str(voc_p.resolve()), sr=sr, mono=False)
-            if y_orig.ndim == 1:
-                y_orig = np.expand_dims(y_orig, axis=0)
-            if y_voc.ndim == 1:
-                y_voc = np.expand_dims(y_voc, axis=0)
-            min_len = min(y_orig.shape[1], y_voc.shape[1])
-            y_orig = y_orig[:, :min_len]
-            y_voc = y_voc[:, :min_len]
-            channels = y_orig.shape[0]
-            inst_channels = []
-            for ch in range(channels):
-                oc, vc = y_orig[ch], y_voc[ch]
-                corr = np.correlate(oc, vc, mode='full')
-                lag = np.argmax(corr) - (len(vc) - 1)
-                if abs(lag) < sr * 0.1:
-                    if lag > 0:
-                        vc_aligned = np.pad(vc[lag:], (0, lag), mode='constant')
-                    elif lag < 0:
-                        vc_aligned = np.pad(vc[:lag], (-lag, 0), mode='constant')
-                    else:
-                        vc_aligned = vc
-                else:
-                    vc_aligned = vc
-                S_o = librosa.stft(oc, n_fft=2048, hop_length=512)
-                S_v = librosa.stft(vc_aligned, n_fft=2048, hop_length=512)
-                mag_o, phase_o = np.abs(S_o), np.angle(S_o)
-                mag_v = np.abs(S_v)
-                spec_env = np.maximum(mag_o - mag_v, 0.02 * mag_o)
-                S_inst = spec_env * np.exp(1j * phase_o)
-                ic = librosa.istft(S_inst, hop_length=512, length=len(oc))
-                inst_channels.append(ic)
-            inst_arr = np.stack(inst_channels, axis=-1) if channels >  1 else np.expand_dims(inst_channels[0], axis=-1)
-            inst_int16 = np.clip(inst_arr * 32767.0, -32768, 32767).astype(np.int16)
-            c_seg = AudioSegment(inst_int16.tobytes(), frame_rate=sr, sample_width=2, channels=channels)
+            o,v = AudioSegment.from_file(str(orig_p.resolve())),AudioSegment.from_file(str(voc_p.resolve()))
+            v = v.set_frame_rate(o.frame_rate).set_channels(o.channels).set_sample_width(o.sample_width)
+            os_,vs_ = np.array(o.get_array_of_samples(),dtype=np.float32),np.array(v.get_array_of_samples(),dtype=np.float32)
+            if len(vs_)<len(os_): vs_ = np.pad(vs_,(0,len(os_)-len(vs_)),'constant')
+            else: vs_ = vs_[:len(os_)]
+            shift = np.argmax(correlate(os_,vs_,mode='full',method='fft'))-(len(vs_)-1)
+            if shift>0: vs_ = np.pad(vs_[shift:],(0,shift),'constant')
+            elif shift<0: vs_ = np.pad(vs_[:shift],(-shift,0),'constant')
+            vn = np.linalg.norm(vs_)
+            if vn>0:
+                sc = np.dot(os_,vs_)/(vn**2)
+                if 0.5<=sc<=1.5: vs_ *= sc
+            cs = np.clip(os_-vs_,-32768,32767).astype(np.int16)
+            c_seg = AudioSegment(cs.tobytes(),frame_rate=o.frame_rate,sample_width=o.sample_width,channels=o.channels)
             tmp = out_m.parent/f"temp_{out_m.name}"
-            c_seg.export(str(tmp), format="mp3", bitrate="192k")
+            c_seg.export(str(tmp),format="mp3",bitrate="192k")
             if tmp.exists():
                 if out_m.exists():
                     try: out_m.unlink()
