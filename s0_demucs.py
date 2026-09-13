@@ -2,7 +2,7 @@ from pathlib import Path
 import os,sys,traceback
 from src.enties import agr
 from src.utils import txt,ext,cal_time,is_ext,listFilter,handle_input
-from src.configuration import P_DIR
+from src.configuration import P_DIR, UVR_MODEL
 from src.modules import demucs
 
 def run(source,output):
@@ -14,11 +14,18 @@ if __name__ == '__main__':
     p = os.path
     args = [
         agr(('-i', '--input')),
-        agr(('-o', '--output'))
+        agr(('-o', '--output')),
+        agr(('-m', '--model'), default='voc') # voc || inst
     ]
 
     kwargs = handle_input(*args)
     source,output = P_DIR,None
+    model = UVR_MODEL
+    if kwargs.model:
+        if kwargs.model.lower() == 'inst': model = 'UVR-MDX-NET-Inst_HQ_3.onnx'
+        elif kwargs.model.lower() == 'voc': model = 'UVR-MDX-NET-Voc_FT.onnx'
+    txt.yellow(f'Model: "{model}"')
+    demucs.C.mn_audio_separate = model
     
     if kwargs.input:
         if p.exists(kwargs.input):source = Path(kwargs.input)
