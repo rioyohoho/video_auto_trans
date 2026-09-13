@@ -17,7 +17,7 @@ def _exec(path:Path, lang:str, words=1):
         [Transcribe(**d) for d in r_json(str(json_path))] if jhs else mdl.transcribe(str(path),lang)
     
     if w==1:
-        for d in data: re.sub(r'[,.!@]', '', d.text)
+        for d in data: d.text = re.sub(r'[,.!@]', '', d.text)
     if not jhs:
         txt.green(f'TRANSCRIBE: {srt_path}')
         w_json(str(json_path), [asdict(d) for d in data])
