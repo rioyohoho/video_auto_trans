@@ -1,116 +1,131 @@
-import os,re,sys,math,time,subprocess
+import os, re, sys, math, time, subprocess
 from pathlib import Path
-from typing import Optional,List, get_type_hints as N,get_origin as O,get_args as P
-from dataclasses import dataclass,field,fields as L,is_dataclass as M
+from typing import Optional, List, get_type_hints as N, get_origin as O, get_args as P
+from dataclasses import dataclass, field, fields as L, is_dataclass as M
 from src.enties import agr
-from src.utils import ext,txt,logger as lg, get_media_duration, get_video_size,\
-	handle_input, listFilter, r_json
+from src.utils import ext, txt, logger as lg, get_media_duration, get_video_size, handle_input, listFilter, r_json
 from src.configuration import TAR_LANG, P_DIR, LANGS
 import torch
 
-cpu_threads = max(1, int(os.cpu_count() * 0.8)) # 80%
-
 class E:
-	class TimelineManager:
-			def __init__(self,ts:list['E2.Timestamp'],sd=0.0):
-				self.mapping,self.total_dur=[],0.0
-				if WITH_MAX_SOURCE or not ts:self.total_dur=sd
-				else:
-					for x in ts:self.mapping.append({'start':x.start,'end':x.end,'new':self.total_dur});self.total_dur+=x.end-x.start
-			def to_new_t(self,ot):
-				if WITH_MAX_SOURCE or not self.mapping:return ot
-				for m in self.mapping:
-					if m['start']<=ot<=m['end']:return m['new']+(ot-m['start'])
-	@dataclass(frozen=False)
-	class Data:
-		@classmethod
-		def parse(cls,d):
-			if not isinstance(d,dict):return d
-			th,k=N(cls),{}
-			for r in L(cls):
-				e=r.name
-				if e not in d:continue
-				a=d[e];b=th.get(e);s=O(b)
-				if s is list:
-					g=P(b)[0]
-					if M(g)and hasattr(g,'parse'):a=[getattr(g,'parse')(x)for x in a]
-				elif M(b)and hasattr(b,'parse'):a=getattr(b,'parse')(a)
-				k[e]=a
-			return cls(**k)
+    class TimelineManager:
+        def __init__(self, ts: list['E2.Timestamp'], sd=0.0):
+            self.mapping, self.total_dur = [], 0.0
+            if WITH_MAX_SOURCE or not ts: self.total_dur = sd
+            else:
+                for x in ts:
+                    self.mapping.append({'start': x.start, 'end': x.end, 'new': self.total_dur})
+                    self.total_dur += x.end - x.start
+        def to_new_t(self, ot):
+            if WITH_MAX_SOURCE or not self.mapping: return ot
+            for m in self.mapping:
+                if m['start'] <= ot <= m['end']: return m['new'] + (ot - m['start'])
+            return None
+
+    @dataclass(frozen=False)
+    class Data:
+        @classmethod
+        def parse(cls, d):
+            if not isinstance(d, dict): return d
+            th, k = N(cls), {}
+            for r in L(cls):
+                e = r.name
+                if e not in d: continue
+                a, b = d[e], th.get(e); s = O(b)
+                if s is list:
+                    g = P(b)[0]
+                    if M(g) and hasattr(g, 'parse'): a = [getattr(g, 'parse')(x) for x in a]
+                elif M(b) and hasattr(b, 'parse'): a = getattr(b, 'parse')(a)
+                k[e] = a
+            return cls(**k)
+
 class E1:
-	@dataclass
-	class ass(E.Data):
-		name: str = "Default"
-		font: str = "Cambria"
-		size: int = 99
-		color: str = "#fff700"
-		secondarycolor: str = "#00ffff" 
-		bordercolor: str = "#000000"
-		backcolor: str = "#00d4ff"
-		bold: bool = False
-		italic: bool = False
-		underline: bool = False
-		strikeout: bool = False
-		scalex: int = 100
-		scaley: int = 100
-		spacing: float = 0.0
-		angle: float = 0.0
-		borderstyle: int = 1
-		borderw: float = 5.0
-		shadow: float = 6.0
-		align: int = 2
-		margin_l: int = 10
-		margin_r: int = 10
-		margin_v: int = 10
-		encoding: int = 1
-		wrap_style: int = 2
+    @dataclass
+    class ass(E.Data):
+        name: str = "Default"
+        font: str = "Cambria"
+        size: int = 99
+        color: str = "#fff700"
+        secondarycolor: str = "#00ffff"
+        bordercolor: str = "#000000"
+        backcolor: str = "#00d4ff"
+        bold: bool = False
+        italic: bool = False
+        underline: bool = False
+        strikeout: bool = False
+        scalex: int = 100
+        scaley: int = 100
+        spacing: float = 0.0
+        angle: float = 0.0
+        borderstyle: int = 1
+        borderw: float = 5.0
+        shadow: float = 6.0
+        align: int = 2
+        margin_l: int = 10
+        margin_r: int = 10
+        margin_v: int = 10
+        encoding: int = 1
+        wrap_style: int = 2
+
 class E2:
-	@dataclass
-	class Timestamp(E.Data):start:float;end:float
-	@dataclass
-	class Point(E.Data):x:int;y:int
-	@dataclass
-	class TsImage(Timestamp):
-		path:Path
-		scale:float=1.0
-		opacity:float=1.0
-		focus:'E2.Point' = field(default_factory=lambda: E2.Point(0, 0))
-		@staticmethod
-		def build_images(vc,imgs:list['E2.TsImage'],tm:'E.TimelineManager',imap:list[int],W:int,H:int):
-			fv=[]
-			for i,(img,idx) in enumerate(zip(imgs,imap)):
-				t=tm.to_new_t(img.start)
-				if t is None:continue
-				te=tm.to_new_t(img.end) or (t+(img.end-img.start))
-				fx,fy=max(0,min(img.focus.x,W)),max(0,min(img.focus.y,H))
-				fv.append(f"[{idx}:v]scale=w=iw*{img.scale}:h=-2,format=rgba,colorchannelmixer=aa={img.opacity},setpts=PTS-STARTPTS[sc{i}]")
-				fv.append(f"[{vc}][sc{i}]overlay=x={fx}-w/2:y={fy}-h/2:enable='between(t,{t:.3f},{te:.3f})'[vim{i}]")
-				vc=f"vim{i}"
-			return ";\n".join(fv),vc
-	@dataclass(frozen=False)
-	class TargetFrames(Timestamp,Point):None
-	@dataclass(frozen=False)
-	class Polygon(Timestamp,E.Data):
-		points:list['E2.Point']=field(default_factory=list)
-		target_frames:list['E2.TargetFrames']=field(default_factory=list)
-	@dataclass(frozen=False)
-	class TsAudio:
-		start:float=0;end:float=0
-		path:Path;volume:float=1.0;fade:float=0.0
-		sst:float=0.0;sen:float=0.0
-		pitch:float=1.0;atempo:float=1.0;is_loop:bool=False
-		@property
-		def path(self) -> Path: return self._path
-		@path.setter
-		def path(self, value: Path):self._path = value;self.end = get_media_duration(str(value))
-	@dataclass(frozen=False)
-	class TsText(Timestamp):text:str
-	@dataclass(frozen=False)
-	class TsSubtitle(TsText, E.Data):
-		x:int=0
-		y:int=0
-		style_ass:E1.ass=field(default_factory=E1.ass)
-		track:int=0
+    @dataclass
+    class Timestamp(E.Data):
+        start: float = 0.0
+        end: float = 0.0
+
+    @dataclass
+    class Point(E.Data):
+        x: int = 0
+        y: int = 0
+
+    @dataclass
+    class TsImage(Timestamp):
+        path: Path = Path()
+        scale: float = 1.0
+        opacity: float = 1.0
+        focus: 'E2.Point' = field(default_factory=lambda: E2.Point(0, 0))
+        @staticmethod
+        def build_images(vc, imgs: list['E2.TsImage'], tm: 'E.TimelineManager', imap: list[int], W: int, H: int):
+            fv = []
+            for i, (img, idx) in enumerate(zip(imgs, imap)):
+                t = tm.to_new_t(img.start)
+                if t is None: continue
+                te = tm.to_new_t(img.end) or (t + (img.end - img.start))
+                fx, fy = max(0, min(img.focus.x, W)), max(0, min(img.focus.y, H))
+                fv.append(f"[{idx}:v]scale=w=iw*{img.scale}:h=-2,format=rgba,colorchannelmixer=aa={img.opacity},setpts=PTS-STARTPTS[sc{i}]")
+                fv.append(f"[{vc}][sc{i}]overlay=x={fx}-w/2:y={fy}-h/2:enable='between(t,{t:.3f},{te:.3f})'[vim{i}]")
+                vc = f"vim{i}"
+            return ";\n".join(fv), vc
+
+    @dataclass(frozen=False)
+    class TargetFrames(Timestamp, Point): None
+
+    @dataclass(frozen=False)
+    class Polygon(Timestamp, E.Data):
+        points: list['E2.Point'] = field(default_factory=list)
+        target_frames: list['E2.TargetFrames'] = field(default_factory=list)
+
+    @dataclass(frozen=False)
+    class TsAudio:
+        start: float = 0; end: float = 0
+        path: Path = Path(); volume: float = 1.0; fade: float = 0.0
+        sst: float = 0.0; sen: float = 0.0
+        pitch: float = 1.0; atempo: float = 1.0; is_loop: bool = False
+        @property
+        def path(self) -> Path: return self._path
+        @path.setter
+        def path(self, value: Path): self._path = value; self.end = get_media_duration(str(value))
+
+    @dataclass(frozen=False)
+    class TsText(Timestamp): text: str = ""
+
+    @dataclass(frozen=False)
+    class TsSubtitle(TsText, E.Data):
+        x: int = 0
+        y: int = 0
+        style_ass: E1.ass = field(default_factory=E1.ass)
+        track: int = 0
+
 class mdl:
 	def _build_video_trim(ts:List[E2.Timestamp],W:int,H:int):
 		sc=f"scale={W}:{H},setsar=1"
@@ -160,9 +175,17 @@ class mdl:
 				xt,yt=max(m,min(int(round(tfs[-1].x-off_x)),W-w-m)),max(m,min(int(round(tfs[-1].y-off_y)),H-h-m))
 				vn=f"vbl{f_idx}";fv.append(f"[{vc}]delogo=x={xt}:y={yt}:w={w}:h={h}:enable='between(t,{st_tail:.3f},{en_tail:.3f})'[{vn}]");vc,f_idx=vn,f_idx+1
 		return ";\n".join(fv),vc
-	def _build_audios(audios:List[E2.TsAudio],tm:E.TimelineManager,aud_map):
+	def _build_audios(audios:List[E2.TsAudio],tm:E.TimelineManager,aud_map,is_mute_video:bool=True,ts:Optional[List[E2.Timestamp]]=None):
 		fa,valid_audios,with_max_source=[],[],globals().get('WITH_MAX_SOURCE',False)
 		SR=44100
+		mix_tags=[]
+		if not is_mute_video:
+			if with_max_source or not ts:
+				fa.append(f"[0:a]aformat=sample_rates={SR}:channel_layouts=stereo[a_orig]")
+			else:
+				a_expr=" + ".join([f"between(t,{t.start},{t.end})" for t in ts])
+				fa.append(f"[0:a]aselect='{a_expr}',asetpts=N/SR/TB,aformat=sample_rates={SR}:channel_layouts=stereo[a_orig]")
+			mix_tags.append("[a_orig]")
 		for i,(a,idx) in enumerate(zip(audios,aud_map)):
 			if with_max_source or not tm.mapping:t_start=a.start
 			else:
@@ -200,7 +223,7 @@ class mdl:
 			fa.append(f"[{idx:d}:a]{','.join(flt)}[processed{i}]")
 			valid_audios.append((i,t_start))
 		fa.append(f"anullsrc=cl=stereo:r={SR}:d={tm.total_dur:.3f}[bg_silent]")
-		mix_tags=["[bg_silent]"]
+		mix_tags.insert(0,"[bg_silent]")
 		for i,t_start in valid_audios:
 			ms=int(t_start*1000)
 			fa.append(f"[processed{i}]adelay={ms}|{ms}[delayed{i}]")
@@ -244,16 +267,13 @@ class mdl:
 		vn = "vsub"
 		filter_str = f"[{vc}]subtitles='{safe_path}'[{vn}]"
 		return filter_str, vn, ass_path
-	def get_mean_db(file_path:str):
-		cmd = ['ffmpeg',
- '-i', file_path,
- '-filter:a', 'volumedetect',
- '-f', 'null', '/dev/null']
+	def _get_mean_db(file_path:str):
+		cmd = ['ffmpeg', '-i', file_path, '-filter:a', 'volumedetect', '-f', 'null', '/dev/null']
 		result = subprocess.run(cmd, stderr=subprocess.PIPE, text=True)
 		match = re.search(r"mean_volume: ([-+]?\d*\.\d+|\d+) dB", result.stderr)
 		return float(match.group(1)) if match else 0.0
-	def volume_balancer(audios: list[E2.TsAudio]):
-		db_values = [mdl.get_mean_db(a.path) for a in audios]
+	def _volume_balancer(audios: list[E2.TsAudio]):
+		db_values = [mdl._get_mean_db(a.path) for a in audios]
 		db_base = db_values[0]
 		for i in range(len(audios)):
 			db_diff = db_base - db_values[i]
@@ -268,7 +288,8 @@ def video_complex(
     subtitles: Optional[List[E2.TsSubtitle]]=None,
     images: Optional[List[E2.TsImage]]=None,
     blurs: Optional[List[E2.Polygon]]=None,
-    target: Optional[Path] = None
+    target: Optional[Path] = None,
+    is_mute_video: bool = True
 ) -> Path:
 	target=target or source.with_name(source.stem+'_h.mp4')
 	if target.exists(): return target
@@ -292,8 +313,8 @@ def video_complex(
 	if subtitles:
 		f,v_temp,p_ass=mdl._build_subtitles(v_c,subtitles,W,H,source)
 		if f:fg.append(f);v_c=v_temp
-	fg.append(mdl._build_audios(audios or [],tm,aud_map))
-	fpath=source.parent/source.stem/f"{source.stem}_filter.text"
+	fg.append(mdl._build_audios(audios or [],tm,aud_map,is_mute_video=is_mute_video,ts=timestamps))
+	fpath=source.parent/source.stem/f"{source.stem}_filter.txt"
 	fpath.parent.mkdir(parents=True,exist_ok=True)
 	with open(fpath,'w',encoding='utf-8') as f:f.write(";\n".join(filter(None,fg)))
 	cmd+=['-filter_complex_script',os.path.relpath(fpath,base_dir),'-map',f'[{v_c}]','-map','[aout]']
@@ -322,62 +343,66 @@ def video_complex(
 		if subtitles:p_ass.unlink(True)
 	return target
 
+cpu_threads = max(1, int(os.cpu_count() * 0.8))
 class MM:
-	o_ff_filter=False
-	ffmpeg_level='error'
-	HARDWARE = [
-		'-c:v', 'hevc_nvenc',
-		'-preset', 'p1',               # P7 là chất lượng cao nhất (Slower/Best Quality)
-		'-rc', 'constqp',              # Chuyển sang ConstQP để có chất lượng đồng đều tốt nhất
-		'-qp', '32',                   # Giá trị QP thấp (18-23) cho chất lượng cực cao (gần như không mất chi tiết)
-		'-multipass', 'fullres',       # Giữ nguyên: Phân tích 2 bước ở độ phân giải đầy đủ
-		'-spatial-aq', '1',            # Giữ nguyên: Tự động phân bổ dữ liệu theo không gian (rất tốt cho chi tiết nhỏ)
-		'-temporal-aq', '1',           # Giữ nguyên: Tự động phân bổ dữ liệu theo thời gian (giảm nhiễu chuyển động)
-		'-pix_fmt', 'p010le',          # Giữ nguyên: Mã hóa 10-bit giúp giảm hiện tượng vỡ màu (banding)
-		'-threads', str(cpu_threads)
-	] if torch.cuda.is_available() else [
-		'-c:v', 'libx265',
-		'-preset', 'medium',
-		'-crf', '32',
-		'-pix_fmt', 'yuv420p10le',
-		'-threads', str(cpu_threads)
-	]
-def exec(source:Path, name:str, langs:list[str], target:Path=None):
-	if not source or not source.exists(): return 'Source is not exist!'
-	parse = lambda pth,T: (txt.green(f'READ: {pth}') if pth.exists() else txt.gray(f'VOID: {pth}')) or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
-	dr = (source.with_suffix('')/name)
-	
-	timestamps:Optional[List[E2.Timestamp]]	=	parse(dr.with_suffix('.json'), E2.Timestamp)
-	audios:Optional[List[E2.TsAudio]]		=	[
-		E2.TsAudio(path=p, volume=v)
-		for (p,v) in [
-			(dr.with_name(f'{name}_music.mp3'), 2.0),			# base music
-			(dr.with_name(f'{name}.{TAR_LANG}.mp3'), 2.0),		# voice translated
-			# (Path(r"MUSIC_PATH"), .5)
-		] if p.exists()
-	]
-	subtitles:Optional[List[E2.TsSubtitle]]	=	parse(dr.with_name('ass_data.json'), E2.TsSubtitle)
-	images:Optional[List[E2.TsImage]]		=	[
-		# E2.TsImage(0,timestamps[-1].end,Path(r"PATH_TO_IMAGE_OR_GIF"),.5,.25, E2.Point(430,768))
-	]
-	blurs:Optional[List[E2.Polygon]]		= 	parse(dr.with_name('blurs.json'), E2.Polygon)
-	target:Optional[Path]					=	dr.with_name(f'{name}_h.mp4')
+    o_ff_filter = False
+    ffmpeg_level = 'error'
+    HARDWARE = [
+        '-hwaccel','cuda','-c:v','hevc_nvenc',
+        '-preset','p1','-rc','constqp','-qp','32',
+        '-multipass','fullres','-spatial-aq','1',
+        '-temporal-aq','1','-pix_fmt','p010le',
+        '-threads',str(cpu_threads)
+    ] if torch.cuda.is_available() else [
+        '-c:v', 'libx265', '-preset', 'medium', '-crf', '32',
+        '-pix_fmt', 'yuv420p10le', '-threads', str(cpu_threads)
+    ]
 
-	#=============================================
-	output = video_complex(source, timestamps, audios, subtitles, images, blurs, target)
-	txt.magenta(output)
-	
-WITH_MAX_SOURCE=False
+def exec(source:Path, name:str, langs:list[str], target:Path=None):
+    if not source or not source.exists(): return 'Source is not exist!'
+    parse = lambda pth,T: (txt.green(f'READ: {pth}') if pth.exists() else txt.gray(f'VOID: {pth}')) or ([T.parse(d) for d in r_json(str(pth))] if pth.exists() else [])
+    dr = (source.with_suffix('')/name)
+
+    # TEST 
+    segments = dr.with_name('segments.json')
+    timestamps:Optional[List[E2.Timestamp]]    =    parse(segments if (not WITH_MAX_SOURCE and segments.exists()) else dr.with_suffix('.json'), E2.Timestamp)
+    audios:Optional[List[E2.TsAudio]]        =    [
+        E2.TsAudio(path=p, volume=v)
+        for (p,v) in [
+            # (dr.with_name(f'{name}_music.mp3'), 1.0),            # base music
+            # (dr.with_name(f'{name}_vocal.mp3'), 2.0),            # base voice
+            # (dr.with_name(f'{name}.{TAR_LANG}.mp3'), 2.0),    # voice translated
+            # (Path(r"MUSIC_PATH"), .5)
+        ] if p.exists()
+    ]
+    subtitles:Optional[List[E2.TsSubtitle]]    =    parse(dr.with_name('ass_data.json'), E2.TsSubtitle)
+    images:Optional[List[E2.TsImage]]        =    [
+        # E2.TsImage(0,timestamps[-1].end,Path(r"PATH_TO_IMAGE_OR_GIF"),.5,.25, E2.Point(430,768))
+    ]
+    blurs:Optional[List[E2.Polygon]]        =     parse(dr.with_name('blurs.json'), E2.Polygon)
+    target:Optional[Path]                    =    dr.with_name(f'{name}_h.mp4')
+
+
+    # audios = mdl._volume_balancer(audios)
+    #=============================================
+    txt.yellow(f'Time: {sum([e.end-e.start for e in timestamps]):.3f}')
+    output = video_complex(source, timestamps, audios, subtitles, images, blurs, target)
+    txt.magenta(output)
+
+WITH_MAX_SOURCE = False
 if __name__ == '__main__':
     args = handle_input(
-        agr(('-i','--input'), type=str, required=False, default=P_DIR),
-        agr(('-l','--language'), type=str, required=False,default=','.join(LANGS))
-    ) 
-    path,l=Path(args.input),str(args.language).split(',')
+        agr(('-i', '--input'), type=str, required=False, default=P_DIR),
+        agr(('-l', '--language'), type=str, required=False, default=','.join(LANGS))
+    )
+    path, l = Path(args.input), str(args.language).split(',')
     if not path.exists() or not l: sys.exit(0)
-
     if path.is_dir():
         for i, n in enumerate(listFilter(path, ext.VIDEO), 1):
-            x=(path/n);exec(x,x.stem, l)
+            x = (path / n); exec(x, x.stem, l)
     elif path.is_file() and str(path).endswith(ext.VIDEO):
-        exec(path,path.stem,l)
+        exec(path, path.stem, l)
+
+
+# del C:\Users\sdhoa\Downloads\test30\test30_h.mp4
+# py D:\dev\py\video_h_complex.py -i "C:\Users\sdhoa\Downloads\test30.mp4"

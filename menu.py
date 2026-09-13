@@ -23,7 +23,7 @@ MENU = [
     ["Text to AI Speech - XTTS", "s3.1_AI_speechs.py", f'-l "{TAR_LANG}"', f'-t {XTTS_TMP_VOICE}', '-mi true'],
     ["Word-Level SRT Generation", "s3.2_srt.py", f'-l "{','.join(LANGS)}"', '-w 1', '-c-bs 5', '-c-wt True', '-c-copt False', '-c-vf True'],
 ]
-_line = '=' * 95
+_line = '=' * 50
 MENU_TITLE = f"{_line}\n{'\t'*5}VIDEO AUTO TRANS PIPELINE\n{_line}\n" + '\n'.join(f'[{i}] {name} {script}({ps})' for i, (name, script, *ps) in enumerate(MENU)) + f"\n{_line}"
 
 def get_input_path(current_path):
