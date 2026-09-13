@@ -1,19 +1,20 @@
-import os,sys,shutil,copy
+import os, sys, shutil, copy
 from pathlib import Path
 from tabulate import tabulate
 from dataclasses import astuple
 from src.modules import speech as mdl, demucs
-from src.enties import Audio,TrackAudio,agr
-from src.utils import ext,txt,r_json,listFilter
-from src.utils import is_ext, listFilter, handle_input, get_media_duration
-from src.configuration import P_DIR,LANGS,MAP_LANGS
+from src.enties import Audio, TrackAudio, agr
+from src.utils import ext, txt, r_json, listFilter, r_text, is_ext, handle_input, get_media_duration
+from src.configuration import P_DIR, LANGS, MAP_LANGS
+import re
+
 P = os.path
 
-def run(path:Path,pitch:float,atempo:float,volume:float,language:str, clean_audio_files=False) -> bool:
-    data:list[dict] = r_json(str(path)) # READ
-    path = path.with_name(f'{path.name.split('.')[0]}.{language}.mp3')
-    segments:list[Audio] = [Audio(**d,pitch=pitch,atempo=atempo,volume=volume) for d in data]
-    peechs:list[Audio] = [a for a in mdl.texts_to_speechs(segments, path.with_suffix(''), target_lang=language) if a is not None]
+def run(path: Path, pitch: float, atempo: float, volume: float, language: str, clean_audio_files=False) -> bool:
+    data: list[dict] = r_json(str(path))
+    path = path.with_name(f"{path.name.split('.')[0]}.{language}.mp3")
+    segments: list[Audio] = [Audio(**d, pitch=pitch, atempo=atempo, volume=volume) for d in data]
+    peechs: list[Audio] = [a for a in mdl.texts_to_speechs(segments, path.with_suffix(''), target_lang=language) if a is not None]
     if not path.exists():
         txt.cyan(f'SPEECH({len(peechs)}) COMBINING...', 1)
         combined_path, duration = mdl.combine_audio_files(peechs, path, auto_speed=True)
@@ -22,8 +23,46 @@ def run(path:Path,pitch:float,atempo:float,volume:float,language:str, clean_audi
             shutil.rmtree(path.with_suffix(''))
         return 1 if combined_path else 0
 
+def exec_text(text_content: str, path: Path, pitch: float, atempo: float, volume: float, language: str, mixes_audio: list[TrackAudio] = None) -> bool:
+    if mixes_audio is None: mixes_audio = []
+    
+    raw_segments = [s.strip() for s in re.split(r'[,.;\n]', text_content) if s.strip()]
+    safe_segments = []
+    for s in raw_segments:
+        while len(s) > 200:
+            chunk = s[:200]
+            space_idx = chunk.rfind(' ')
+            if space_idx != -1:
+                chunk = s[:space_idx]
+                s = s[space_idx:].strip()
+            else:
+                s = s[200:].strip()
+            safe_segments.append(chunk)
+        if s:
+            safe_segments.append(s)
+
+    temp_dir = path.with_suffix('')
+    segments = [Audio(text=s, start=0, end=0, pitch=pitch, atempo=atempo, volume=volume) for s in safe_segments]
+    
+    peechs = [a for a in mdl.texts_to_speechs(segments, temp_dir, target_lang=language) if a is not None]
+    
+    current_start = 0.0
+    timed_segments = []
+    for a in peechs:
+        from pydub import AudioSegment
+        seg_duration = AudioSegment.from_file(a.text).duration_seconds
+        timed_segments.append(Audio(text=a.text, start=current_start, end=current_start + seg_duration, pitch=pitch, atempo=atempo, volume=volume))
+        current_start += seg_duration
+
+    if not path.exists() and timed_segments:
+        txt.cyan(f'SPEECH({len(timed_segments)}) COMBINING...', 1)
+        combined_path, duration = mdl.combine_audio_files(timed_segments, path, auto_speed=False)
+        (txt.magenta if combined_path else txt.red)(f'{duration}, {combined_path}')
+        return 1 if combined_path else 0
+    return 0
+
 def _exec_json(x_langs: tuple[tuple[Path, float, float, float, str]], mixes_audio: list[TrackAudio] = None):
-    if mixes_audio is None:mixes_audio = []
+    if mixes_audio is None: mixes_audio = []
     txt.cyan(tabulate(
         headers=['path', 'pitch', 'atempo', 'volume', 'language'],
         tabular_data=x_langs, tablefmt="grid"
@@ -36,7 +75,7 @@ def _exec_json(x_langs: tuple[tuple[Path, float, float, float, str]], mixes_audi
             current_mixes = copy.deepcopy(mixes_audio)
             current_mixes.append(TrackAudio(0, 0, f'.{nls[1]}.mp3', volume=2.0))
             for ma in current_mixes:
-                if not Path(ma.text).is_absolute():ma.text = nls[0] + ma.text
+                if not Path(ma.text).is_absolute(): ma.text = nls[0] + ma.text
                 ma.snd = ma.end = get_media_duration(ma.text)
             output = '.'.join([nls[0], MAP_LANGS.get(nls[1], nls[1]), 'mp3'])
             txt.gray(tabulate(
@@ -50,25 +89,32 @@ def _exec_json(x_langs: tuple[tuple[Path, float, float, float, str]], mixes_audi
 
 if __name__ == '__main__':
     mixes = [
-        TrackAudio(0,0,f'_{demucs.C.n_instrumental}.mp3',volume=.5),
-        TrackAudio(0,0,f'_{demucs.C.n_voice}.mp3',volume=.25),
+        TrackAudio(0, 0, f'_{demucs.C.n_instrumental}.mp3', volume=.5),
+        TrackAudio(0, 0, f'_{demucs.C.n_voice}.mp3', volume=.25),
     ]
     args = handle_input(
         agr(('-i', '--input'), type=str, required=False, default=P_DIR),
-        agr(('-l', '--language'), type=str, required=False,default=','.join(LANGS)),
+        agr(('-l', '--language'), type=str, required=False, default=','.join(LANGS)),
         agr(('-p', '--pitch'), type=float, required=False, default=1.39),
         agr(('-a', '--atempo'), type=float, required=False, default=1.25),
         agr(('-v', '--volume'), type=float, required=False, default=2.0)
     ) 
-    i,l,p,a,v=str(args.input),str(args.language).split(','),float(args.pitch),float(args.atempo),float(args.volume)
-    path:Path = Path(i)
+    i, l, p, a, v = str(args.input), str(args.language).split(','), float(args.pitch), float(args.atempo), float(args.volume)
+    path: Path = Path(i)
     if not path.exists() or not l: sys.exit(0)
 
     if path.is_dir():
-        for i, n in enumerate(listFilter(path, ext.VIDEO), 1):
-            x=(path/n);xp=x.with_suffix('')/x.stem
-            _exec_json([(xp.with_suffix(f'.{_l}.json'),p,a,v, _l) for _l in l],mixes)
+        for item in listFilter(path, ext.VIDEO):
+            x = (path / item)
+            xp = x.with_suffix('') / x.stem
+            _exec_json([(xp.with_suffix(f'.{_l}.json'), p, a, v, _l) for _l in l], mixes)
     elif path.is_file():
-        if is_ext(str(path), ext.VIDEO): 
-            path = (path.with_suffix('')/path.stem)
-        _exec_json([(path.with_suffix(f'.{_l}.json'),p,a,v, _l) for _l in l],mixes)
+        if path.suffix.lower() == '.txt':
+            content = r_text(str(path))
+            for _l in l:
+                out_path = path.with_name(f"{path.stem}.{_l}.mp3")
+                exec_text(content, out_path, p, a, v, _l, mixes)
+        else:
+            if is_ext(str(path), ext.VIDEO): 
+                path = (path.with_suffix('') / path.stem)
+            _exec_json([(path.with_suffix(f'.{_l}.json'), p, a, v, _l) for _l in l], mixes)

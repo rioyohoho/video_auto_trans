@@ -12,7 +12,6 @@ P = os.path
 processor = cal_time(lambda: XTTSProcessor(), 'LOAD: XTTSProcessor', 1, 1)
 
 def adjust_speed(wav: torch.Tensor, target_len: int, sr: int = 24000) -> torch.Tensor:
-	"""Tự động tăng tốc độ đọc khớp với target_len (giữ nguyên tone giọng)"""
 	cur_len = wav.shape[-1]
 	if cur_len <= target_len or target_len <= 0:
 		return wav
@@ -38,7 +37,6 @@ def run_timestamp(data: list, output: Path, language: str = TAR_LANG, tmp_voice:
 		txt.red("No valid subtitle items found in JSON!")
 		return
 	
-	# Xác định tổng độ dài chính xác của audio theo timestamp cuối cùng
 	max_end_time = max(float(x.get('end', 0.0)) for x in valid_items)
 	total_samples = int(max_end_time * sr)
 	canvas = torch.zeros((1, total_samples), dtype=torch.float32)
