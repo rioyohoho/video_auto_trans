@@ -30,7 +30,7 @@ class XTTSProcessor:
 		return self.m
 	def _tlen(self,txt:str,lang:str)->int:
 		return len(self.get_model().tokenizer.encode(txt,lang=lang))
-	def split_text_by_tokens(self,text:str,lang:str,mt:int=200)->List[str]:
+	def split_text_by_tokens(self, text: str, lang: str, mt: int = 300) -> List[str]:
 		c,cur,cl=[],'',0
 		for s in re.split(r'(?<=[.!?])\s+',text):
 			sl=self._tlen(s,lang)
@@ -53,7 +53,18 @@ class XTTSProcessor:
 		gl,se=m.get_conditioning_latents(audio_path=tmp_voice,gpt_cond_len=m.config.gpt_cond_len,max_ref_length=m.config.max_ref_len,sound_norm_refs=m.config.sound_norm_refs)
 		for t in texts:
 			if not t.strip(): continue
-			kargs=dict(text=t,gpt_cond_latent=gl,speaker_embedding=se,temperature=0.1,length_penalty=1.0,repetition_penalty=10.0,top_k=20,top_p=0.8,enable_text_splitting=False,language=language)
+			kargs = dict(
+				text=t,
+				gpt_cond_latent=gl,
+				speaker_embedding=se,
+				temperature=0.6, 
+				length_penalty=1.0,
+				repetition_penalty=2.0, 
+				top_k=50,               
+				top_p=0.85,           
+				enable_text_splitting=True,
+				language=language
+			)
 			o=m.inference(**kargs)
 			w=torch.tensor(o['wav'])
 			res.append(w.unsqueeze(0) if w.dim()==1 else w)
