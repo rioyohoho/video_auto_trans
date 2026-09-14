@@ -15,6 +15,7 @@ pip install --upgrade pip setuptools wheel
 ```
 ### 2. Install libraries
 ```
+pip install spacy
 pip install pydub
 pip install faster-whisper
 pip install gTTS

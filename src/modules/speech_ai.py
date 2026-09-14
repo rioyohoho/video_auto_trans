@@ -27,10 +27,14 @@ class XTTSProcessor:
 		self.m.load_checkpoint(cfg,checkpoint_dir=self.ckpt,eval=True)
 		self.m.to(self.dev)
 		self.m.tokenizer.preprocess_text=lambda txt,lang: txt.strip()
+		if hasattr(self.m.tokenizer, 'char_limits'):
+			if 'vi' not in self.m.tokenizer.char_limits:
+				self.m.tokenizer.char_limits['vi'] = 250
+				
 		return self.m
 	def _tlen(self,txt:str,lang:str)->int:
 		return len(self.get_model().tokenizer.encode(txt,lang=lang))
-	def split_text_by_tokens(self, text: str, lang: str, mt: int = 300) -> List[str]:
+	def split_text_by_tokens(self, text: str, lang: str, mt: int = 250) -> List[str]:
 		c,cur,cl=[],'',0
 		for s in re.split(r'(?<=[.!?])\s+',text):
 			sl=self._tlen(s,lang)

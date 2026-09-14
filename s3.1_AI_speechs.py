@@ -26,7 +26,7 @@ def adjust_speed(wav: torch.Tensor, target_len: int, sr: int = 24000) -> torch.T
 		return torch.nn.functional.interpolate(wav.unsqueeze(0), size=target_len, mode='linear', align_corners=False).squeeze(0)
 
 def run(text: str, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE)):
-	ts = processor.split_text_by_tokens(text, lang=language, mt=100)
+	ts = processor.split_text_by_tokens(text, lang=language, mt=250)
 	mini_text = lambda txt, sz=100: txt if len(txt) <= sz else txt[:sz//2] + ' ... ' + txt[-sz//2:]
 	txt.cyan(tabulate(maxcolwidths=[None, None, None, 50], headers=['language', 'output', 'tmp_voice', 'texts'], tabular_data=[(language, str(output), str(tmp_voice), mini_text('\n'.join(ts), 50))], tablefmt="grid"))
 	processor.save(output, processor.concat(processor.text_to_ai_speeches(ts, language=language, tmp_voice=tmp_voice)))
