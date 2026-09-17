@@ -44,4 +44,4 @@ if __name__ == '__main__':
             run(source=source/v,output=((output or source)/v).with_suffix(''))
     elif source.is_file() and is_ext(str(source)):
         run(source=source,output=output or source.with_suffix(''))
-        
+    else: txt.yellow(f'[NONE]: {source}')
