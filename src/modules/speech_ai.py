@@ -5,6 +5,14 @@ from TTS.tts.models.xtts import Xtts
 from huggingface_hub import snapshot_download
 from src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
 
+class XTTS_C:
+	temperature=0.5
+	length_penalty=1.0
+	repetition_penalty=2.0
+	top_k=50
+	top_p=0.85
+	enable_text_splitting=True
+
 class XTTSProcessor:
 	_inst=None
 	def __new__(cls,*args,**kwargs):
@@ -61,12 +69,12 @@ class XTTSProcessor:
 				text=t,
 				gpt_cond_latent=gl,
 				speaker_embedding=se,
-				temperature=0.6, 
-				length_penalty=1.0,
-				repetition_penalty=2.0, 
-				top_k=50,               
-				top_p=0.85,           
-				enable_text_splitting=True,
+				temperature=XTTS_C.temperature, 
+				length_penalty=XTTS_C.length_penalty,
+				repetition_penalty=XTTS_C.repetition_penalty, 
+				top_k=XTTS_C.top_k,               
+				top_p=XTTS_C.top_p,           
+				enable_text_splitting=XTTS_C.enable_text_splitting,
 				language=language
 			)
 			o=m.inference(**kargs)

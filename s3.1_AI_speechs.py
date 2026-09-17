@@ -3,7 +3,7 @@ import torch
 import torchaudio
 from pathlib import Path
 from tabulate import tabulate
-from src.modules.speech_ai import XTTSProcessor
+from src.modules.speech_ai import XTTSProcessor, XTTS_C
 from src.enties import agr
 from src.utils import ext, txt, file, r_json, listFilter, handle_input, txt_normalize, cal_time, str2bool, progress
 from src.configuration import PATH_BASE, P_DIR, TAR_LANG, XTTS_TMP_VOICE
@@ -98,6 +98,13 @@ def _exec(p: Path, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE, min_mod
 def _exec_str(text: str, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE):
 	run(text, o or Path(f'./{txt_normalize(text, 39)}.{l}.wav'), l, str(t))
 
+
+XTTS_C.temperature = 0.1
+XTTS_C.repetition_penalty = 1.0
+XTTS_C.length_penalty = 1.0
+XTTS_C.top_k = 50
+XTTS_C.top_p = 0.85
+XTTS_C.enable_text_splitting = False
 if __name__ == '__main__':
 	args = handle_input(
 		agr(('-i', '--input'), type=str, required=False, default=P_DIR),
