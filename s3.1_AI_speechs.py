@@ -3,7 +3,7 @@ import torch
 import torchaudio
 from pathlib import Path
 from tabulate import tabulate
-from src.modules.speech_ai import XTTSProcessor, XTTS_C
+from src.modules.speech_ai import XTTSProcessor
 from src.enties import agr
 from src.utils import ext, txt, file, r_json, listFilter, handle_input, txt_normalize, cal_time, str2bool, progress
 from src.configuration import PATH_BASE, P_DIR, TAR_LANG, XTTS_TMP_VOICE
@@ -26,12 +26,14 @@ def adjust_speed(wav: torch.Tensor, target_len: int, sr: int = 24000) -> torch.T
 		return torch.nn.functional.interpolate(wav.unsqueeze(0), size=target_len, mode='linear', align_corners=False).squeeze(0)
 
 def run(text: str, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE)):
-	ts = processor.split_text_by_tokens(text, lang=language, mt=250)
+	if PASS_IF_EXIST and output.exists(): txt.yellow(f'[CONTINUE]: {str(output)} EXIST'); return
+	ts = processor.split_text_by_tokens(text, lang=language, mt=200)
 	mini_text = lambda txt, sz=100: txt if len(txt) <= sz else txt[:sz//2] + ' ... ' + txt[-sz//2:]
 	txt.cyan(tabulate(maxcolwidths=[None, None, None, 50], headers=['language', 'output', 'tmp_voice', 'texts'], tabular_data=[(language, str(output), str(tmp_voice), mini_text('\n'.join(ts), 50))], tablefmt="grid"))
 	processor.save(output, processor.concat(processor.text_to_ai_speeches(ts, language=language, tmp_voice=tmp_voice)))
 
-def run_timestamp(data: list, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE), sr: int = 24000):
+def run_timestamp(data: list, output: Path, language: str = TAR_LANG, tmp_voice: str = str(XTTS_TMP_VOICE), sr: int = 24e3):
+	if PASS_IF_EXIST and output.exists(): txt.yellow(f'[CONTINUE]: {str(output)} EXIST'); return
 	valid_items = [x for x in data if isinstance(x, dict) and x.get('text', '').strip()]
 	if not valid_items:
 		txt.red("No valid subtitle items found in JSON!")
@@ -96,15 +98,11 @@ def _exec(p: Path, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE, min_mod
 	run(d, out_path, l, str(t))
 
 def _exec_str(text: str, o: Path, l: str = TAR_LANG, t: Path = XTTS_TMP_VOICE):
-	run(text, o or Path(f'./{txt_normalize(text, 39)}.{l}.wav'), l, str(t))
+	o = o or Path(f'./{txt_normalize(text, 39)}.{l}.wav')
+	run(text, o, l, str(t))
 
 
-XTTS_C.temperature = 0.1
-XTTS_C.repetition_penalty = 1.0
-XTTS_C.length_penalty = 1.0
-XTTS_C.top_k = 50
-XTTS_C.top_p = 0.85
-XTTS_C.enable_text_splitting = False
+PASS_IF_EXIST = True
 if __name__ == '__main__':
 	args = handle_input(
 		agr(('-i', '--input'), type=str, required=False, default=P_DIR),

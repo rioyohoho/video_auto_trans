@@ -6,9 +6,9 @@ from huggingface_hub import snapshot_download
 from src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
 
 class XTTS_C:
-	temperature=0.5
+	temperature=0.6
 	length_penalty=1.0
-	repetition_penalty=2.0
+	repetition_penalty=1.0
 	top_k=50
 	top_p=0.85
 	enable_text_splitting=True
@@ -42,23 +42,25 @@ class XTTSProcessor:
 		return self.m
 	def _tlen(self,txt:str,lang:str)->int:
 		return len(self.get_model().tokenizer.encode(txt,lang=lang))
-	def split_text_by_tokens(self, text: str, lang: str, mt: int = 250) -> List[str]:
-		c,cur,cl=[],'',0
-		for s in re.split(r'(?<=[.!?])\s+',text):
-			sl=self._tlen(s,lang)
-			if sl>mt:
-				if cur: c.append(cur.strip());cur,cl='',0
-				tmp=''
-				for w in s.split():
-					tst=tmp+(' '+w if tmp else w)
-					if self._tlen(tst,lang)<=mt: tmp=tst
-					else: c.append(tmp.strip());tmp=w
-				if tmp: c.append(tmp.strip())
-				continue
-			if cl+sl<=mt: cur+=(' '+s if cur else s);cl+=sl
-			else: c.append(cur.strip());cur,cl=s,sl
-		if cur: c.append(cur.strip())
-		return c
+	def split_text_by_tokens(self,text:str,lang:str='vi',mt:int=200)->List[str]:
+		if len(text)<=mt:return[text]
+		chunks=[];sentences=re.split('(?<=[.!?,;])\\s+',text);cur=''
+		for s in sentences:
+			s=s.strip()
+			if not s:continue
+			if len(cur)+len(s)+1<=mt:cur=(cur+' '+s).strip()if cur else s
+			else:
+				if cur:chunks.append(cur)
+				if len(s)>mt:
+					words=s.split();sub_cur=''
+					for w in words:
+						if len(sub_cur)+len(w)+1<=mt:sub_cur=(sub_cur+' '+w).strip()if sub_cur else w
+						else:chunks.append(sub_cur);sub_cur=w
+					if sub_cur:chunks.append(sub_cur)
+					cur=''
+				else:cur=s
+		if cur:chunks.append(cur)
+		return chunks
 	def text_to_ai_speeches(self,texts:List[str],language:str=TAR_LANG or 'vi',tmp_voice:str=str(XTTS_TMP_VOICE))->List[torch.Tensor]:
 		if not os.path.exists(tmp_voice): raise FileNotFoundError(tmp_voice)
 		m,res=self.get_model(),[]
