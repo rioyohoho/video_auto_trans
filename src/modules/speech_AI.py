@@ -3,7 +3,7 @@ from typing import BinaryIO,List,Union
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 from huggingface_hub import snapshot_download
-from video_auto_trans.src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
+from src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
 
 class XTTS_C:
 	temperature=0.6

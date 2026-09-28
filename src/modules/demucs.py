@@ -4,8 +4,8 @@ import numpy as np
 from scipy.signal import correlate
 from pydub import AudioSegment
 from audio_separator.separator import Separator
-from video_auto_trans.src.utils import extract_audio
-from video_auto_trans.src.configuration import ext,UVR_MODEL,UVR_DIR_PATH
+from src.utils import extract_audio
+from src.configuration import ext,UVR_MODEL,UVR_DIR_PATH
 class C:
     fmt,model_dir,mn_audio_separate,log_level = 'mp3',UVR_DIR_PATH,UVR_MODEL,logging.WARNING
     audio_ext,video_ext,n_voice,n_instrumental = ext.AUDIO,ext.VIDEO,'vocal','music'

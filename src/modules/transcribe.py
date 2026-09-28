@@ -3,9 +3,9 @@ from typing import Optional, List, Callable
 from faster_whisper import WhisperModel
 from pathlib import Path
 from dataclasses import asdict
-from video_auto_trans.src.utils import cal_time, w_json, txt as lg_txt
+from src.utils import cal_time, w_json, txt as lg_txt
 from torch import cuda
-from video_auto_trans.src.enties import Transcribe
+from src.enties import Transcribe
 
 class C: #configuration
 	MODEL = 'medium' # WhisperModel : name or path

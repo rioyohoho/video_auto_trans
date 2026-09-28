@@ -1,13 +1,13 @@
 import sys
 from pathlib import Path
 from dataclasses import asdict,astuple
-from video_auto_trans.src.enties import agr,Transcribe
-from video_auto_trans.src.utils import txt,r_json,w_json,w_text,to_srt,handle_input,cal_time,filter_bad_words
-from video_auto_trans.src.utils.text import str2bool
-from video_auto_trans.src.modules.translate_G import translates,text_translation,ai_translation
-from video_auto_trans.src.modules.translate_L import local_translation
-from video_auto_trans.src.configuration import P_DIR,LANGS,TAR_LANG,PATH_BASE
-from video_auto_trans.src.workspace import find_workspaces,Workspace,Model,TransModel
+from src.enties import agr,Transcribe
+from src.utils import txt,r_json,w_json,w_text,to_srt,handle_input,cal_time,filter_bad_words
+from src.utils.text import str2bool
+from src.modules.translate_G import translates,text_translation,ai_translation
+from src.modules.translate_L import local_translation
+from src.configuration import P_DIR,LANGS,TAR_LANG,PATH_BASE
+from src.workspace import find_workspaces,Workspace,Model,TransModel
 
 RE_WORDS:dict=cal_time(lambda:r_json(str(PATH_BASE/f'assets/replace_bad_words.{TAR_LANG}.json')),'Load bad_words',clear=1)
 

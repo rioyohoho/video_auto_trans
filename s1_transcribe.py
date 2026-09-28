@@ -1,11 +1,11 @@
 import sys,traceback
 from dataclasses import asdict
-from video_auto_trans.src.enties import agr,Transcribe
-from video_auto_trans.src.utils import txt,handle_input,cal_time,w_json
-from video_auto_trans.src.utils.text import str2bool
-from video_auto_trans.src.modules import transcribe
-from video_auto_trans.src.configuration import P_DIR
-from video_auto_trans.src.workspace import find_workspaces,Workspace
+from src.enties import agr,Transcribe
+from src.utils import txt,handle_input,cal_time,w_json
+from src.utils.text import str2bool
+from src.modules import transcribe
+from src.configuration import P_DIR
+from src.workspace import find_workspaces,Workspace
 
 def run(ws:Workspace,language:str=None):
     if ws.origin_json.exists()and ws.origin_json.stat().st_size>0:return txt.magenta(f'[PASS] "{str(ws.origin_json)}"')

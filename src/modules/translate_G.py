@@ -1,4 +1,4 @@
-from video_auto_trans.src.utils import logger as log
+from src.utils import logger as log
 from .googleAI import request
 
 TAB = 3

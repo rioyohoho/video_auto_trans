@@ -1,8 +1,8 @@
 import sys
 from enum import IntEnum
 from pathlib import Path
-from video_auto_trans.src.utils import is_ext
-from video_auto_trans.src.configuration import ext,aud,P_DIR
+from src.utils import is_ext
+from src.configuration import ext,aud,P_DIR
 from enum import StrEnum
 
 class Model(StrEnum):

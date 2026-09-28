@@ -2,11 +2,11 @@ import subprocess, textwrap, copy, os, re
 from datetime import timedelta
 from pathlib import Path
 from typing import Optional, List, Tuple
-from video_auto_trans.src.enties import *
-from video_auto_trans.src.utils.video import get_media_duration, get_video_size
-from video_auto_trans.src.configuration import FFMPEG
-from video_auto_trans.src.utils.file import r_json
-from video_auto_trans.src.utils import logger as LG
+from src.enties import *
+from src.utils.video import get_media_duration, get_video_size
+from src.configuration import FFMPEG
+from src.utils.file import r_json
+from src.utils import logger as LG
 
 _cfg_path = Path(FFMPEG) if FFMPEG else None
 _ff_data: dict = r_json(str(_cfg_path)) if _cfg_path and _cfg_path.exists() else {}

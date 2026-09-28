@@ -1,7 +1,7 @@
 import os,sys,time,subprocess
 from pathlib import Path
 from typing import Callable
-from video_auto_trans.src.configuration import ext
+from src.configuration import ext
 
 def execute_after_countdown(exec_in=3,exec_sys:str|Callable=lambda:0):
 	B=exec_sys;A=exec_in;print(f"Execute command: '{B}' in {A} senconds.")
@@ -15,7 +15,7 @@ exec_in = execute_after_countdown
 
 import argparse
 from dataclasses import  asdict
-from video_auto_trans.src.enties import agr
+from src.enties import agr
 
 def handle_input(*args: agr):
     parser = argparse.ArgumentParser(description=__file__)

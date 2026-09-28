@@ -1,11 +1,11 @@
 import re
 from dataclasses import astuple,asdict
-from video_auto_trans.src.enties import Transcribe,agr
-from video_auto_trans.src.utils.text import str2bool
-from video_auto_trans.src.modules.transcribe import mdl,C as trC
-from video_auto_trans.src.utils import txt,w_json,w_text,to_srt,handle_input
-from video_auto_trans.src.configuration import P_DIR,LANGS
-from video_auto_trans.src.workspace import find_workspaces,Workspace
+from src.enties import Transcribe,agr
+from src.utils.text import str2bool
+from src.modules.transcribe import mdl,C as trC
+from src.utils import txt,w_json,w_text,to_srt,handle_input
+from src.configuration import P_DIR,LANGS
+from src.workspace import find_workspaces,Workspace
 
 PUNCT=re.compile(r'[.,;:?!…]["\'”’)]?$')
 

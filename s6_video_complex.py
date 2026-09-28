@@ -1,9 +1,9 @@
 import argparse
 from pathlib import Path
-from video_auto_trans.src.modules.prepare_render import prepare_and_render
-from video_auto_trans.src.configuration import TAR_LANG,RENDER_CONFIG
-from video_auto_trans.src.workspace import find_workspaces
-from video_auto_trans.src.utils import txt
+from src.modules.prepare_render import prepare_and_render
+from src.configuration import TAR_LANG,RENDER_CONFIG
+from src.workspace import find_workspaces
+from src.utils import txt
 
 def main():
     parser=argparse.ArgumentParser(description="Render video complex")

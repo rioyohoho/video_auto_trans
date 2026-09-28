@@ -1,5 +1,5 @@
 import os, cv2, easyocr, numpy as np
-from video_auto_trans.src.enties import Delogo_KeyFrames, Delogo, Canvas
+from src.enties import Delogo_KeyFrames, Delogo, Canvas
 
 class C:
     step = 1.0

@@ -1,9 +1,9 @@
 import os,sys,subprocess,platform
 from pathlib import Path
-from video_auto_trans.src.enties import agr,Canvas
-from video_auto_trans.src.utils import handle_input,ext,txt
-from video_auto_trans.src.configuration import TAR_LANG,LANGS,XTTS_TMP_VOICE,RENDER_CONFIG
-from video_auto_trans.src.workspace import Model,TransModel
+from src.enties import agr,Canvas
+from src.utils import handle_input,ext,txt
+from src.configuration import TAR_LANG,LANGS,XTTS_TMP_VOICE,RENDER_CONFIG
+from src.workspace import Model,TransModel
 
 IS_NEW_CMD_WINDOWN = False
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))

@@ -1,6 +1,6 @@
 import translators as ts
-from video_auto_trans.src.utils import logger as log
-from video_auto_trans.src.configuration import TAR_LANG
+from src.utils import logger as log
+from src.configuration import TAR_LANG
 
 def local_translation(texts:str|list[str],from_lang:str='auto',tar_lang:str=TAR_LANG,chunk_size:int=45)->str|list[str]:
     f_code='auto'if from_lang in('auto','',None)else from_lang.lower().split('_')[0].split('-')[0]

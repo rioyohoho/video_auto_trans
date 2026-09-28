@@ -1,11 +1,11 @@
 import hashlib,re
 from pathlib import Path
-from src.modules.speech_ai import XTTSProcessor
-from video_auto_trans.src.modules import speech_G as mdl
-from video_auto_trans.src.enties import Clip_Audio,Source,Transcribe,agr
-from video_auto_trans.src.utils import txt,r_json,r_text,handle_input,get_media_duration,cal_time,str2bool
-from video_auto_trans.src.configuration import PATH_BASE,P_DIR,TAR_LANG,XTTS_TMP_VOICE
-from video_auto_trans.src.workspace import find_workspaces,Workspace
+from src.modules.speech_AI import XTTSProcessor
+from src.modules import speech_G as mdl
+from src.enties import Clip_Audio,Source,Transcribe,agr
+from src.utils import txt,r_json,r_text,handle_input,get_media_duration,cal_time,str2bool
+from src.configuration import PATH_BASE,P_DIR,TAR_LANG,XTTS_TMP_VOICE
+from src.workspace import find_workspaces,Workspace
 
 processor=cal_time(lambda:XTTSProcessor(),'LOAD: XTTSProcessor',1,1)
 

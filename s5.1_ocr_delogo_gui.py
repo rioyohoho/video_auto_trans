@@ -3,12 +3,12 @@ from pathlib import Path
 from PyQt6.QtCore import Qt,QTimer,QThread,pyqtSignal,QPointF,QRectF,QPoint
 from PyQt6.QtGui import QPainter,QColor,QPen,QBrush,QImage,QPixmap,QWheelEvent,QMouseEvent,QKeyEvent,QKeySequence,QShortcut,QCursor
 from PyQt6.QtWidgets import QApplication,QMainWindow,QWidget,QSplitter,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QDoubleSpinBox,QSpinBox,QComboBox,QCheckBox,QProgressBar,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QScrollArea,QFrame,QSizePolicy
-from video_auto_trans.src.enties import Canvas,Polygon,Delogo,Delogo_KeyFrames,Transcribe
-from video_auto_trans.src.modules.delogo import get_roi_bounds,box_to_polygon,polygon_to_box,find_text_box_ocr,load_subtitles,estimate_box
-from video_auto_trans.src.utils.file import r_json,w_json
-from video_auto_trans.src.utils.text import str2bool
-from video_auto_trans.src.utils.video import get_media_duration
-from video_auto_trans.src.configuration import READER
+from src.enties import Canvas,Polygon,Delogo,Delogo_KeyFrames,Transcribe
+from src.modules.delogo import get_roi_bounds,box_to_polygon,polygon_to_box,find_text_box_ocr,load_subtitles,estimate_box
+from src.utils.file import r_json,w_json
+from src.utils.text import str2bool
+from src.utils.video import get_media_duration
+from src.configuration import READER
 def get_box_at(clip:Delogo_KeyFrames,t:float)->tuple[int,int,int,int]:
 	if not clip.keyframes:return 0,0,clip.width,clip.height
 	kfs=sorted(clip.keyframes,key=lambda k:k.t)

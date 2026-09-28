@@ -2,8 +2,8 @@ import io, time, hashlib, tempfile, math, subprocess, traceback
 from gtts import gTTS
 from pydub import AudioSegment
 from pathlib import Path
-from video_auto_trans.src.utils import txt, line, progress
-from video_auto_trans.src.enties import Clip_Audio, Source, Transcribe
+from src.utils import txt, line, progress
+from src.enties import Clip_Audio, Source, Transcribe
 
 class C:
     fmt = 'wav'
@@ -17,7 +17,7 @@ def mix_audio_files(audios:list[Clip_Audio],output_path:Path)->tuple[Path,float]
 		cmd.extend(['-i',str(Path(a.source.path).resolve())]);vol=getattr(a,'volume',1.);start_ms=int(getattr(a,'start',.0)*1000);flt=f"volume={vol}"
 		if start_ms>0:flt+=f",adelay={start_ms}|{start_ms}"
 		filter_inputs.append(f"[{i}:a]{flt}[a{i}]")
-	n=len(valid_audios);mix_tags=''.join([f"[a{i}]"for i in range(n)]);complex_filter=f"{";".join(filter_inputs)};{mix_tags}amix=inputs={n}:duration=longest:dropout_transition=0:normalize=0,alimiter=limit=0.95[out]";cmd.extend(['-filter_complex',complex_filter,'-map','[out]','-c:a','pcm_s16le'if output_path.suffix.lower()=='.wav'else'libmp3lame','-b:a','192k',str(output_path.resolve()),'-loglevel','error']);subprocess.run(cmd,check=True);from video_auto_trans.src.utils.video import get_media_duration;actual_dur=get_media_duration(output_path);return output_path,actual_dur
+	n=len(valid_audios);mix_tags=''.join([f"[a{i}]"for i in range(n)]);complex_filter=f"{";".join(filter_inputs)};{mix_tags}amix=inputs={n}:duration=longest:dropout_transition=0:normalize=0,alimiter=limit=0.95[out]";cmd.extend(['-filter_complex',complex_filter,'-map','[out]','-c:a','pcm_s16le'if output_path.suffix.lower()=='.wav'else'libmp3lame','-b:a','192k',str(output_path.resolve()),'-loglevel','error']);subprocess.run(cmd,check=True);from src.utils.video import get_media_duration;actual_dur=get_media_duration(output_path);return output_path,actual_dur
 
 def combine_audio_files(audios: list[Clip_Audio], output_path: Path, duration: float = .0, auto_speed=True) -> tuple[Path, float]:
     if not audios: 

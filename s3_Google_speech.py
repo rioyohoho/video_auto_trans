@@ -1,10 +1,10 @@
 import re, hashlib
 from pathlib import Path
-from video_auto_trans.src.modules import speech_G as mdl
-from video_auto_trans.src.enties import Clip_Audio,Source,Transcribe,agr
-from video_auto_trans.src.utils import txt,r_json,r_text,handle_input,get_media_duration
-from video_auto_trans.src.configuration import P_DIR,LANGS
-from video_auto_trans.src.workspace import find_workspaces,Workspace
+from src.modules import speech_G as mdl
+from src.enties import Clip_Audio,Source,Transcribe,agr
+from src.utils import txt,r_json,r_text,handle_input,get_media_duration
+from src.configuration import P_DIR,LANGS
+from src.workspace import find_workspaces,Workspace
 
 def parse_segments(p:Path)->list[Transcribe]:
     if not p.exists():return []

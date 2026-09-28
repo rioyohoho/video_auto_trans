@@ -1,11 +1,11 @@
 import argparse
 from pathlib import Path
-from video_auto_trans.src.modules.delogo import create_blurs_json,preview_delogo
-from video_auto_trans.src.modules.prepare_render import RC
-from video_auto_trans.src.enties import Canvas
-from video_auto_trans.src.utils import txt
-from video_auto_trans.src.utils.text import str2bool
-from video_auto_trans.src.configuration import ext
+from src.modules.delogo import create_blurs_json,preview_delogo
+from src.modules.prepare_render import RC
+from src.enties import Canvas
+from src.utils import txt
+from src.utils.text import str2bool
+from src.configuration import ext
 
 def get_video_list(inp:Path)->list[Path]:
     videos=[]

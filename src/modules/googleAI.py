@@ -1,9 +1,9 @@
 import time
 from google import genai
 from google.genai import types, errors
-from video_auto_trans.src.configuration import GEMINI_MODEL,KEY_STATUS_PATH
-from video_auto_trans.src.utils import logger as log
-from video_auto_trans.src.utils import execute_after_countdown
+from src.configuration import GEMINI_MODEL,KEY_STATUS_PATH
+from src.utils import logger as log
+from src.utils import execute_after_countdown
 
 class T:
     list_APIkeys=[] # https://aistudio.google.com/api-keys

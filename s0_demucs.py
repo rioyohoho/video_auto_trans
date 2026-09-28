@@ -1,9 +1,9 @@
 import sys,traceback
-from video_auto_trans.src.enties import agr
-from video_auto_trans.src.utils import txt,cal_time,handle_input
-from video_auto_trans.src.configuration import P_DIR,UVR_MODEL
-from video_auto_trans.src.modules import demucs
-from video_auto_trans.src.workspace import find_workspaces,Workspace
+from src.enties import agr
+from src.utils import txt,cal_time,handle_input
+from src.configuration import P_DIR,UVR_MODEL
+from src.modules import demucs
+from src.workspace import find_workspaces,Workspace
 
 def run(ws:Workspace):
     voc_dst,mus_dst=ws.vocal_path('.mp3'),ws.music_path('.mp3')

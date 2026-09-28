@@ -1,13 +1,13 @@
 import cv2, numpy as np
 from pathlib import Path
 from typing import List, Tuple, Optional, Union
-from video_auto_trans.src.enties import Canvas, Polygon, Delogo, Delogo_KeyFrames, Transcribe
-from video_auto_trans.src.utils.video import get_media_duration
-from video_auto_trans.src.utils.file import r_json, w_json
-from video_auto_trans.src.utils.text import convert_srt
-from video_auto_trans.src.utils.logger import progress
-from video_auto_trans.src.utils import logger as LG
-from video_auto_trans.src.configuration import READER
+from src.enties import Canvas, Polygon, Delogo, Delogo_KeyFrames, Transcribe
+from src.utils.video import get_media_duration
+from src.utils.file import r_json, w_json
+from src.utils.text import convert_srt
+from src.utils.logger import progress
+from src.utils import logger as LG
+from src.configuration import READER
 
 def get_roi_bounds(W: int, H: int, area: Union[Canvas.Area, int], ratio: float = 0.35) -> Tuple[int, int, int, int]:
     if not isinstance(area, Canvas.Area):

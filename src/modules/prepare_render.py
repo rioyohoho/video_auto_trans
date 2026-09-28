@@ -1,17 +1,17 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Union, Dict, Any
-from video_auto_trans.src.enties import (
+from src.enties import (
     Data, Clip_Audio, Source, Clip_Video, Video_Keyframes,
     Delogo, Delogo_KeyFrames, Polygon, Transcribe,
     Font, Solid, Color, Alignment, Subtitle, Timestamp
 )
-from video_auto_trans.src.utils.video import get_media_duration
-from video_auto_trans.src.utils.file import r_json
-from video_auto_trans.src.utils.text import convert_srt
-from video_auto_trans.src.utils import logger as LG
-from video_auto_trans.src.modules.render import video_complex
-from video_auto_trans.src.configuration import ext, TAR_LANG
+from src.utils.video import get_media_duration
+from src.utils.file import r_json
+from src.utils.text import convert_srt
+from src.utils import logger as LG
+from src.modules.render import video_complex
+from src.configuration import ext, TAR_LANG
 
 def _resolve_color_val(val: Any, default: str = "#ffffffff") -> str:
     if not val: return default
