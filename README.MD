@@ -45,6 +45,20 @@ Automated pipeline for video translation, vocal/music separation, voice cloning 
   - Batch Pipeline Runner: python exec.py -i <video_or_folder>
   - Manual Delogo GUI: python s5.1_ocr_delogo_gui.py -i <video_file>
 
+**Quick Examples**
+1. Directory path
+    ```
+    cd [PROJECT_PATH]
+    ```
+2. Open Terminal UI
+    ```
+    python menu.py -i "[VIDEO_OR_FOLDER_PATH]"
+    ```
+3. Run full pipeline for all videos in a folder
+    ```
+    python exec.py -i "[VIDEO_OR_FOLDER_PATH]"
+    ```
+
 **Parameters Table**
 | Index  | Command / Script         | Caption (Purpose)                       | Key Parameters                                                                                                                                                                                                                                |
 | :----: | :----------------------- | :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,17 +73,3 @@ Automated pipeline for video translation, vocal/music separation, voice cloning 
 | `s5`   | `s5_ocr_delogo.py`       | Auto-detect hardsub blur box            | `-i` Input video path<br>`-a` ROI area enum (`123`: Bottom, `789`: Top, ...)<br>`-am` Subtitle max length mode (`True`/`False`)<br>`-tm` Full-length timeline blur (`True`/`False`)                                                           |
 | `s5.1` | `s5.1_ocr_delogo_gui.py` | GUI editor for delogo bounding box      | `-i` Video path<br>`-a` Initial area code<br>`-am` Subtitle max mode (`True`/`False`)<br>`-tm` Timestamp max mode (`True`/`False`)                                                                                                            |
 | `s6`   | `s6_video_complex.py`    | Render final video with filters & audio | `-i` Input path<br>`-o` Output path<br>`-l` Target language<br>`-c` Config JSON path<br>`-st` Start trim (seconds)<br>`-en` End trim (seconds)                                                                                                |
-
-**Quick Examples**
-1. Directory path
-    ```
-    cd [PROJECT_PATH]
-    ```
-2. Open Terminal UI
-    ```
-    python menu.py -i "[VIDEO_OR_FOLDER_PATH]"
-    ```
-3. Run full pipeline for all videos in a folder
-    ```
-    python exec.py -i "[VIDEO_OR_FOLDER_PATH]"
-    ```
