@@ -1,4 +1,4 @@
-# Tự động Dịch & Xử lý Video | [TIẾNG ANH](./README.md)
+# Tự động Dịch & Xử lý Video | [ENGLISH](./README.md)
 
 Quy trình tự động hóa dùng để dịch video, tách giọng nói/nhạc nền, nhân bản giọng nói (TTS), tạo phụ đề, xóa hình mờ phụ đề (delogo) và render lại video.
 
