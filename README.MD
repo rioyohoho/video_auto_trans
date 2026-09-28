@@ -1,4 +1,4 @@
-# Video Auto Translation & Processing
+# Video Auto Translation & Processing | [TIẾNG VIỆT](./README_vn.MD)
 
 Automated pipeline for video translation, vocal/music separation, voice cloning (TTS), subtitle generation, subtitle watermark removal (delogo), and video re-rendering.
 
@@ -72,4 +72,4 @@ Automated pipeline for video translation, vocal/music separation, voice cloning 
 | `s4`   | `s4_srt.py`              | Word-level / Karaoke SRT                | `-i` Input path<br>`-l` Target languages<br>`-w` Words per chunk (`1`)<br>`-k` Active word color hex (`#00aaff`)                                                                                                                              |
 | `s5`   | `s5_ocr_delogo.py`       | Auto-detect hardsub blur box            | `-i` Input video path<br>`-a` ROI area enum (`123`: Bottom, `789`: Top, ...)<br>`-am` Subtitle max length mode (`True`/`False`)<br>`-tm` Full-length timeline blur (`True`/`False`)                                                           |
 | `s5.1` | `s5.1_ocr_delogo_gui.py` | GUI editor for delogo bounding box      | `-i` Video path<br>`-a` Initial area code<br>`-am` Subtitle max mode (`True`/`False`)<br>`-tm` Timestamp max mode (`True`/`False`)                                                                                                            |
-| `s6`   | `s6_video_complex.py`    | Render final video with filters & audio | `-i` Input path<br>`-o` Output path<br>`-l` Target language<br>`-c` Config JSON path<br>`-st` Start trim (seconds)<br>`-en` End trim (seconds)                                                                                                |
+| `s6`   | `s6_video_complex.py`    | Render final video | `-i` Input path<br>`-o` Output path<br>`-l` Target language<br>`-c` Config JSON path<br>`-st` Start trim (seconds)<br>`-en` End trim (seconds)                                                                                                |
