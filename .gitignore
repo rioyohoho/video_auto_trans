@@ -1,0 +1,9 @@
+#assets
+assets/audio-models
+assets/tmp_musics
+# git update-index --assume-unchanged assets/_curren_key
+
+test/*
+build/*
+
+__pycache__

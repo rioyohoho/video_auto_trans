@@ -1,0 +1,58 @@
+{
+  "is_max_source": true,
+  "is_desub": true,
+  "is_subtitles": true,
+  "subtitle_path": null,
+  "subtitle_style": {
+    "font": {
+      "name": "Coiny",
+      "size": "auto",
+      "bold": true,
+      "italic": false,
+      "spacing": 1
+    },
+    "color": {
+      "primary": "#00aaff",
+      "outline": "#000000ff",
+      "shadow": "#00000080"
+    },
+    "background": {
+      "color": "",
+      "gradient": {"colors": ["#ffffff", "#00a1ff", "#fff700"], "deg": 45},
+      "outline": "#000000ff",
+      "margin": 3
+    },
+    "alignment": 3,
+    "outline_width": 3,
+    "shadow_depth": 1
+  },
+  "target_path": "",
+  "base_audio": {
+    "volume": 0.0
+  },
+  "audios": [
+    {
+      "volume": 0.08,
+      "tempo": 1.0,
+      "pitch": 0.0,
+      "repeat": true,
+      "source": {
+        "path": null
+      }
+    },
+    {
+      "volume": 0.95,
+      "tempo": 1.0,
+      "pitch": 0.0,
+      "source": {
+        "path": null
+      }
+    }
+  ],
+  "add_images": [],
+  "delogo": [
+    {
+      "polygones": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "bin": "ffmpeg",
+  "ffprobe": "ffprobe",
+  "ffmpeg_level": "error",
+  "o_ff_filter": false,
+  "hardware": [
+    "-hwaccel", "cuda",
+    "-c:v", "hevc_nvenc",
+    "-preset", "p4",
+    "-tune", "hq",
+    "-rc", "vbr",
+    "-cq", "23",
+    "-b:v", "0",
+    "-multipass", "qres",
+    "-spatial-aq", "1",
+    "-temporal-aq", "1",
+    "-pix_fmt", "yuv420p"
+  ]
+}
