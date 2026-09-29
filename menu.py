@@ -5,9 +5,9 @@ from textual.containers import VerticalScroll, Horizontal, Vertical
 from textual.widgets import Header, Footer, Label, Input, Checkbox, Button, RichLog, Select
 from textual.events import Click
 from rich.text import Text
-from video_auto_trans.src.enties import agr, Canvas
-from video_auto_trans.src.utils import handle_input
-from video_auto_trans.src.configuration import TAR_LANG, LANGS, XTTS_TMP_VOICE, RENDER_CONFIG
+from src.enties import agr, Canvas
+from src.utils import handle_input
+from src.configuration import TAR_LANG, LANGS, XTTS_TMP_VOICE, RENDER_CONFIG
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AREA_OPTIONS = [
