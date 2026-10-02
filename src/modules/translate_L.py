@@ -2,8 +2,10 @@ import re,time,translators as ts
 from src.utils import logger as log
 from src.configuration import TAR_LANG
 
+engs = ('google','bing','caiyun')
+
 def _s_trans(t:str,f:str,to:str)->str:
-    for e in('google','bing','caiyun'):
+    for e in engs:
         try:
             r=ts.translate_text(t,translator=e,from_language=f,to_language=to)
             if r:return str(r).strip()
@@ -21,7 +23,7 @@ def local_translation(texts:str|list[str],from_lang:str='auto',tar_lang:str=TAR_
         log.pr(min(i+chunk_size,len(lines)),len(lines),txt=f"FastLocalBatch({f_code}->{t_code})...")
         joined="\n".join([f"⟦{j}⟧ {t.strip()if t.strip()else '...'}"for j,t in enumerate(chunk)])
         res=None
-        for e in('google','bing','caiyun'):
+        for e in engs:
             try:
                 res=ts.translate_text(joined,translator=e,from_language=f_code,to_language=t_code)
                 if res:break
