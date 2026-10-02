@@ -18,26 +18,25 @@ Automated pipeline for video translation, vocal/music separation, voice cloning 
 ### Step 1: Base Libraries (Common for CPU & GPU)
 1. **Dependencies**
     ```
-    pip install colorama pydub scipy numpy pyperclip python-dotenv PyQt6 textual deep-translator translators gTTS google-genai
+    pip install colorama pydub scipy numpy pyperclip python-dotenv PyQt6 textual deep-translator translators gTTS google-genai coqui-tts
     ```
 ### Step 2: Hardware-Specific Libraries
 1. **Option A: CPU Only**
     ```
-    # PyTorch CPU
+    # PyTorch CPU & ONNX Runtime CPU
     pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-    # ONNX Runtime CPU
     pip install onnxruntime
-    # AI Models (Demucs, Whisper, OCR, XTTS)
-    pip install easyocr audio-separator faster-whisper TTS
+    # AI Models (Demucs, Whisper, OCR)
+    pip install easyocr audio-separator faster-whisper
     ```
-2. **Option B: NVIDIA GPU (CUDA 12.1)**
+2. **Option B: NVIDIA GPU**
     ```
-    # PyTorch CUDA
-    pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
-    # ONNX Runtime GPU
-    pip install onnxruntime-gpu
-    # AI Models (Demucs, Whisper, OCR, XTTS)
-    pip install easyocr audio-separator faster-whisper TTS
+    # PyTorch for CUDA 12.1
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    # ONNX Runtime GPU (CUDA 12 compatible version)
+    pip install "onnxruntime-gpu==1.20.0" nvidia-cuda-runtime-cu12 nvidia-cudnn-cu12
+    # AI Pipeline Models
+    pip install easyocr audio-separator faster-whisper
     ```
 ## 2. Usage & Parameter Reference
 **Quick Commands**
