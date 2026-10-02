@@ -47,7 +47,7 @@ if __name__=='__main__':
     args=handle_input(
         agr(('-i','--input'),type=str,default=P_DIR),
         agr(('-l','--language'),type=str,default=','.join(LANGS)),
-        agr(('-m','--model'),type=int,default=0),
+        agr(('-m','--model'),type=int,default=3),
         agr(('-s','--srt'),type=str2bool,default=True),
     )
     langs,workspaces=str(args.language).split(','),find_workspaces(args.input)
