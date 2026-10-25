@@ -3,41 +3,48 @@
 Automated pipeline for video translation, vocal/music separation, voice cloning (TTS), subtitle generation, subtitle watermark removal (delogo), and video re-rendering.
 
 ## 1. Installation
-**System Requirement**
+**Prerequisites**
+- Python and pip.
+- FFmpeg and ffprobe installed and available on `PATH`.
 
-**FFmpeg** must be installed and added to system `PATH`.
+Install the cross-platform baseline from the project root:
+```powershell
+python -m pip install -r requirements.txt
+```
+The requirements file uses the CPU ONNX Runtime extra by default. Install only one `audio-separator` backend; do not combine CPU, GPU, and DirectML ONNX Runtime packages in the same environment.
+
+**Optional GPU backends**
+
+NVIDIA: replace the default audio-separator CPU backend with its GPU extra, and install a PyTorch build matching the CUDA version supported by your driver:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime
+python -m pip install "audio-separator[gpu]"
+python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
+python -m pip install "audio-separator[dml]"
+```
+For AMD on Linux, install a PyTorch/ROCm build supported by the GPU and OS. Whisper through CTranslate2 currently uses CPU on AMD.
+
+**Automatic hardware selection**
+- Demucs uses CUDA or DirectML when the matching Torch and ONNX Runtime providers are available; otherwise it uses CPU.
+- Whisper uses CUDA only when CTranslate2 reports a usable CUDA device. It falls back to CPU `int8` if GPU model initialization fails.
+- XTTS and EasyOCR use the supported PyTorch GPU runtime; XTTS falls back to CPU when unavailable.
+- Rendering selects a compatible NVIDIA or Windows AMD encoder when available. If hardware encoding fails, it retries with a software CPU encoder.
+
+**Soft render**
+Set `SOFT_RENDER=True` in `.env` to copy the original video stream without re-encoding, subtitles, delogo, images, or overlays, while still mixing and re-encoding audio. It preserves the full source duration, so `-st` and `-en` are ignored. Set `SOFT_RENDER=False` for normal video rendering.
 
 **Configuration**
 - API key: [assets/_curren_key](assets/_curren_key)
 - FFmpeg: [assets/ffmpeg_config.json](assets/ffmpeg_config.json)
-- Style: [assets/render_config.json](assets/render_config.json)
-- Enviroment: [.env](.env)
-- Source config: [src/configuration.py](src/configuration.py)
+- Render style and audio tracks: [assets/render_config.json](assets/render_config.json)
+- Environment settings: [.env](.env)
+- Source configuration: [src/configuration.py](src/configuration.py)
 
-
-### Step 1: Base Libraries (Common for CPU & GPU)
-1. **Dependencies**
-    ```
-    pip install colorama pydub scipy numpy pyperclip python-dotenv PyQt6 textual deep-translator translators gTTS google-genai coqui-tts
-    ```
-### Step 2: Hardware-Specific Libraries
-1. **Option A: CPU Only**
-    ```
-    # PyTorch CPU & ONNX Runtime CPU
-    pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-    pip install onnxruntime
-    # AI Models (Demucs, Whisper, OCR)
-    pip install easyocr audio-separator faster-whisper
-    ```
-2. **Option B: NVIDIA GPU**
-    ```
-    # PyTorch for CUDA 12.1
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-    # ONNX Runtime GPU (CUDA 12 compatible version)
-    pip install "onnxruntime-gpu==1.20.0" nvidia-cuda-runtime-cu12 nvidia-cudnn-cu12
-    # AI Pipeline Models
-    pip install easyocr audio-separator faster-whisper
-    ```
 ## 2. Usage & Parameter Reference
 **Quick Commands**
   - Interactive UI Menu: python menu.py -i <video_or_folder>

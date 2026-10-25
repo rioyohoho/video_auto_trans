@@ -18,7 +18,9 @@ def run(ws:Workspace):
         if m_out.exists()and m_out!=mus_dst:m_out.rename(mus_dst)
         txt.green(f'[DONE]: "{str(voc_dst)}"')
         txt.green(f'[DONE]: "{str(mus_dst)}"')
-    except Exception as e:traceback.print_exception(e)
+    except Exception:
+        traceback.print_exc()
+        raise
 
 if __name__=='__main__':
     process:demucs.Processor=cal_time(lambda:demucs.Processor(),'Load Processor')

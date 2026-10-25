@@ -3,42 +3,48 @@
 Quy trình tự động hóa dùng để dịch video, tách giọng nói/nhạc nền, nhân bản giọng nói (TTS), tạo phụ đề, xóa hình mờ phụ đề (delogo) và render lại video.
 
 ## 1. Cài đặt
-**Yêu cầu hệ thống**
+**Yêu cầu**
+- Python và pip.
+- Cài FFmpeg/ffprobe riêng và thêm vào `PATH`.
 
-**FFmpeg** bắt buộc phải được cài đặt và thêm vào biến môi trường `PATH` của hệ thống.
+Cài dependencies cơ bản tại thư mục dự án:
+```powershell
+python -m pip install -r requirements.txt
+```
+`requirements.txt` mặc định dùng ONNX Runtime CPU để tương thích rộng. Chỉ cài một backend `audio-separator`; không cài đồng thời các gói ONNX Runtime CPU, GPU và DirectML.
+
+**GPU tùy chọn**
+
+NVIDIA: thay backend CPU mặc định bằng extra GPU, đồng thời cài PyTorch phù hợp với phiên bản CUDA mà driver hỗ trợ:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime
+python -m pip install "audio-separator[gpu]"
+python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+AMD trên Windows: dùng DirectML thay cho các gói NVIDIA/CUDA:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
+python -m pip install "audio-separator[dml]"
+```
+AMD trên Linux cần bản PyTorch/ROCm tương thích với GPU và hệ điều hành. Whisper qua CTranslate2 hiện dùng CPU trên AMD.
+
+**Tự động chọn phần cứng**
+- Demucs dùng CUDA hoặc DirectML khi có đủ provider Torch và ONNX Runtime tương ứng; nếu không sẽ dùng CPU.
+- Whisper chỉ dùng CUDA khi CTranslate2 xác nhận thiết bị hoạt động. Nếu khởi tạo model GPU lỗi, chương trình chuyển sang CPU `int8`.
+- XTTS và EasyOCR dùng GPU thông qua runtime PyTorch được hỗ trợ; XTTS chuyển sang CPU nếu không có.
+- Render chọn encoder NVIDIA hoặc AMD trên Windows khi khả dụng. Nếu encoder GPU lỗi, chương trình tự render lại bằng encoder CPU.
+
+**Soft render**
+Đặt `SOFT_RENDER=True` trong `.env` để copy nguyên video nguồn, không encode lại hình ảnh và bỏ subtitle, delogo, ảnh, overlay; chương trình vẫn mix và encode lại âm thanh. Chế độ này giữ toàn bộ thời lượng nguồn nên bỏ qua `-st` và `-en`. Đặt `SOFT_RENDER=False` để render video bình thường.
 
 **Cấu hình**
 - Khóa API: [assets/_curren_key](assets/_curren_key)
 - FFmpeg: [assets/ffmpeg_config.json](assets/ffmpeg_config.json)
-- Giao diện/Phong cách: [assets/render_config.json](assets/render_config.json)
+- Kiểu render và các track audio: [assets/render_config.json](assets/render_config.json)
 - Biến môi trường: [.env](.env)
 - Cấu hình nguồn: [src/configuration.py](src/configuration.py)
 
-
-### Bước 1: Thư viện cơ bản (Dùng chung cho cả CPU và GPU)
-1. **Các phụ thuộc (Dependencies)**
-    ```
-    pip install colorama pydub scipy numpy pyperclip python-dotenv PyQt6 textual deep-translator translators gTTS google-genai
-    ```
-### Bước 2: Thư viện theo phần cứng
-1. **Tùy chọn A: Chỉ dùng CPU**
-    ```
-    # PyTorch CPU
-    pip install torch torchaudio --index-url [https://download.pytorch.org/whl/cpu](https://download.pytorch.org/whl/cpu)
-    # ONNX Runtime CPU
-    pip install onnxruntime
-    # Các mô hình AI (Demucs, Whisper, OCR, XTTS)
-    pip install easyocr audio-separator faster-whisper TTS
-    ```
-2. **Tùy chọn B: GPU NVIDIA (CUDA 12.1)**
-    ```
-    # PyTorch CUDA
-    pip install torch torchaudio --index-url [https://download.pytorch.org/whl/cu121](https://download.pytorch.org/whl/cu121)
-    # ONNX Runtime GPU
-    pip install onnxruntime-gpu
-    # Các mô hình AI (Demucs, Whisper, OCR, XTTS)
-    pip install easyocr audio-separator faster-whisper TTS
-    ```
 ## 2. Hướng dẫn sử dụng & Tham số
 **Lệnh nhanh**
   - Giao diện Terminal tương tác: python menu.py -i 

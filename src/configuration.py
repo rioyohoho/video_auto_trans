@@ -23,6 +23,7 @@ class aud(Enum):
 PATH_BASE = Path(__file__).parent.parent
 FFMPEG = env_p(env('FFMPEG_CONFIG', 'assets/ffmpeg_config.json'), PATH_BASE)
 RENDER_CONFIG = env_p(env('RENDER_CONFIG', 'assets/render_config.json'), PATH_BASE)
+SOFT_RENDER = env('SOFT_RENDER', 'True').strip().lower() in ('1', 'true', 'yes', 'on')
 
 UVR_MODEL = env('UVR_MODEL', 'UVR-MDX-NET-Voc_FT.onnx')
 UVR_DIR_PATH = env_p(env('UVR_DIR_PATH', 'assets/audio-models'), PATH_BASE)

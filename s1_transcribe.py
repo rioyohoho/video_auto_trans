@@ -22,7 +22,9 @@ def run(ws:Workspace,language:str=None):
         data:list[Transcribe]=cal_time(lambda:call(str(source_audio),language=target_lang),f'Transcribing {ws.stem} using {source_audio.name}',tab=1)
         w_json(ws.origin_json,[asdict(d)for d in data])
         txt.green(f'[DONE]: "{str(ws.origin_json)}"')
-    except Exception as e:traceback.print_exception(e)
+    except Exception:
+        traceback.print_exc()
+        raise
 
 if __name__=='__main__':
     args=handle_input(

@@ -5,13 +5,14 @@ from scipy.signal import correlate
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 from src.utils import extract_audio
+from src.utils.hardware import is_directml_available
 from src.configuration import ext,UVR_MODEL,UVR_DIR_PATH
 class C:
     fmt,model_dir,mn_audio_separate,log_level = 'mp3',UVR_DIR_PATH,UVR_MODEL,logging.WARNING
     audio_ext,video_ext,n_voice,n_instrumental = ext.AUDIO,ext.VIDEO,'vocal','music'
 class Processor:
     def __init__(self):
-        self.separator = Separator(model_file_dir=C.model_dir,output_format=C.fmt,log_level=C.log_level)
+        self.separator = Separator(model_file_dir=C.model_dir,output_format=C.fmt,log_level=C.log_level,use_directml=is_directml_available())
         self.separator.load_model(C.mn_audio_separate)
     def _clean(self,orig_p:Path,voc_p:Path,out_m:Path):
         try:
@@ -38,24 +39,22 @@ class Processor:
                 tmp.rename(out_m)
         except Exception: pass
     def separate(self,source:Path,output:Path|None=None,is_extract_audio=True,is_clean_music=True) -> tuple[Path,Path]:
-        v_au = source if source.suffix.endswith(C.audio_ext) else (source.with_suffix('.m4a') if source.with_suffix('.m4a').exists() else (extract_audio(source) if is_extract_audio else source))
-        source = v_au if is_extract_audio else source
         target_dir = output if output else source.parent
         target_dir.mkdir(parents=True,exist_ok=True)
+        if source.suffix.lower() in C.audio_ext:
+            v_au = source
+        elif is_extract_audio:
+            audio_path = target_dir/f"{source.stem}_demucs.flac"
+            audio_path.unlink(missing_ok=True)
+            v_au = extract_audio(source, suffix='.flac', output_path=audio_path)
+            if v_au is None: raise RuntimeError(f"Failed to extract audio: {source}")
+        else:
+            v_au = source
         prefix = f"{source.stem}_" if source.stem else ""
         p_v,p_n = target_dir/f"{prefix}{C.n_voice}.mp3",target_dir/f"{prefix}{C.n_instrumental}.mp3"
         if p_v.resolve() == p_n.resolve(): p_n = target_dir/f"{prefix}music.mp3"
         if p_v.exists() and p_n.exists() and p_v.stat().st_size>0 and p_n.stat().st_size>0: return p_v,p_n
-        out = None
-        try:
-            if not (source.suffix.lower() in C.audio_ext and source.stat().st_size<=10240): out = self.separator.separate(str(source))
-        except Exception: out = None
-        if not out or not isinstance(out,list) or len(out)<2:
-            vid = source.with_suffix('.mp4')
-            if not vid.exists():
-                for e in C.video_ext:
-                    if source.with_suffix(e).exists(): vid = source.with_suffix(e);break
-            if vid.exists(): out = self.separator.separate(str(vid))
+        out = self.separator.separate(str(v_au))
         if not out or not isinstance(out,list) or len(out)<2: raise RuntimeError(f"Failed: {source}")
         files = []
         for item in out[:2]:

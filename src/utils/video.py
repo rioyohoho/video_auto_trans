@@ -1,20 +1,26 @@
 import subprocess, json, math
 from pathlib import Path
 
-def extract_audio(video_path,suffix='.m4a',ffmpeg_path='ffmpeg'):
-	output=video_path.with_suffix(suffix)
-	if output.exists()and output.stat().st_size>0:return output
-	probe_cmd=['ffprobe','-v','error','-select_streams','a:0','-show_entries','stream=index,codec_name','-of','json',str(video_path)]
-	try:
-		res=subprocess.check_output(probe_cmd,stderr=subprocess.DEVNULL)
-		if not json.loads(res).get('streams'):return None
-	except Exception:pass
-	cmd_copy=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-map','0:a:0','-vn','-c:a','copy',str(output)]
-	if subprocess.run(cmd_copy,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0 and output.exists()and output.stat().st_size>0:return output
-	cmd_encode=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-map','0:a:0','-vn','-c:a','aac','-b:a','192k',str(output)]
-	if subprocess.run(cmd_encode,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0 and output.exists()and output.stat().st_size>0:return output
-	if output.exists():output.unlink(missing_ok=True)
-	return video_path
+def extract_audio(video_path,suffix='.m4a',ffmpeg_path='ffmpeg',output_path=None):
+    video_path=Path(video_path)
+    output=Path(output_path)if output_path else video_path.with_suffix(suffix)
+    output.parent.mkdir(parents=True,exist_ok=True)
+    if output.exists()and output.stat().st_size>0:return output
+    probe_cmd=['ffprobe','-v','error','-select_streams','a:0','-show_entries','stream=index,codec_name','-of','json',str(video_path)]
+    try:
+        res=subprocess.check_output(probe_cmd,stderr=subprocess.DEVNULL)
+        if not json.loads(res).get('streams'):return None
+    except Exception:pass
+    if output.suffix.lower()not in('.wav','.flac'):
+        cmd_copy=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-map','0:a:0','-vn','-c:a','copy',str(output)]
+        if subprocess.run(cmd_copy,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0 and output.exists()and output.stat().st_size>0:return output
+    codec='pcm_s16le'if output.suffix.lower()=='.wav'else('flac'if output.suffix.lower()=='.flac'else'aac')
+    cmd_encode=[ffmpeg_path,'-hide_banner','-loglevel','error','-y','-i',str(video_path),'-map','0:a:0','-vn','-c:a',codec]
+    if codec=='aac':cmd_encode.extend(['-b:a','192k'])
+    cmd_encode.append(str(output))
+    if subprocess.run(cmd_encode,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0 and output.exists()and output.stat().st_size>0:return output
+    if output.exists():output.unlink(missing_ok=True)
+    return None
 
 def get_media_duration(path):
     p=Path(path)

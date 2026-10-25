@@ -4,15 +4,17 @@ from faster_whisper import WhisperModel
 from pathlib import Path
 from dataclasses import asdict
 from src.utils import cal_time, w_json, txt as lg_txt
-from torch import cuda
+from src.utils.hardware import get_ctranslate2_runtime
 from src.enties import Transcribe
+
+CT2_DEVICE, CT2_TYPE = get_ctranslate2_runtime()
 
 class C: #configuration
 	MODEL = 'medium' # WhisperModel : name or path
 	HF_TOKEN = os.getenv('HF_TOKEN')
-	_IS_CUDA = cuda.is_available()
-	DEVICE = "cuda" if _IS_CUDA else "cpu"
-	TYPE = "float16" if _IS_CUDA else "int8"
+	_IS_CUDA = CT2_DEVICE == "cuda"
+	DEVICE = CT2_DEVICE
+	TYPE = CT2_TYPE
 	language=None
 	smin=.15
 	smax=3.0
@@ -21,9 +23,18 @@ class C: #configuration
 	condition_on_previous_text=True
 	vad_filter=False
 
+def load_whisper_model() -> WhisperModel:
+	try:
+		return WhisperModel(C.MODEL, device=C.DEVICE, compute_type=C.TYPE)
+	except Exception as e:
+		if C.DEVICE == "cpu": raise
+		lg_txt.yellow(f"Whisper GPU initialization failed; falling back to CPU: {e}")
+		C._IS_CUDA,C.DEVICE,C.TYPE=False,"cpu","int8"
+		return WhisperModel(C.MODEL, device=C.DEVICE, compute_type=C.TYPE)
+
 class mdl: # Models
 	ndigits=3
-	whisper:WhisperModel = cal_time(lambda: WhisperModel(C.MODEL, device=C.DEVICE, compute_type=C.TYPE), 'Load WhisperModel', clear=1)
+	whisper:WhisperModel = cal_time(load_whisper_model, 'Load WhisperModel', clear=1)
 	def transcribe(audio_path:str,language:Optional[str]=C.language)->List[Transcribe]:
 		def r(nf,dg=mdl.ndigits):return round(nf,dg)
 		res,info= mdl.whisper.transcribe(

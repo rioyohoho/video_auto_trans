@@ -4,11 +4,14 @@ from pathlib import Path
 from typing import Optional, List, Tuple
 from src.enties import *
 from src.utils.video import get_media_duration, get_video_size
-from src.configuration import FFMPEG
+from src.configuration import FFMPEG, SOFT_RENDER
 from src.utils.file import r_json
 from src.utils import logger as LG
+from src.utils.hardware import get_gpu_backend, get_ffmpeg_encoders
 
 _cfg_path = Path(FFMPEG) if FFMPEG else None
+if not _cfg_path or not _cfg_path.exists():
+    _cfg_path = Path(__file__).resolve().parents[2] / 'assets' / 'ffmpeg_config.json'
 _ff_data: dict = r_json(str(_cfg_path)) if _cfg_path and _cfg_path.exists() else {}
 
 class MM:
@@ -36,6 +39,35 @@ class is_use:
     o_cre_srt = True
 
 WITH_MAX_SOURCE = True
+
+def get_render_hardware_args(force_cpu: bool = False) -> list[str]:
+    configured = list(MM.HARDWARE or [])
+    encoders = get_ffmpeg_encoders(MM.BIN)
+    backend, device_name = get_gpu_backend()
+    vendor = device_name.lower()
+    if not configured:
+        if not force_cpu and backend == 'cuda' and 'nvidia' in vendor and 'h264_nvenc' in encoders:
+            return ['-c:v', 'h264_nvenc', '-preset', 'p4', '-cq', '23', '-b:v', '0', '-pix_fmt', 'yuv420p']
+        if not force_cpu and os.name == 'nt' and (backend in ('amd', 'rocm', 'directml') or 'amd' in vendor or 'radeon' in vendor) and 'h264_amf' in encoders:
+            return ['-c:v', 'h264_amf', '-quality', 'balanced', '-rc', 'cqp', '-qp_i', '23', '-qp_p', '23', '-pix_fmt', 'yuv420p']
+        return ['-c:v', 'libx264', '-preset', 'medium', '-crf', '23', '-pix_fmt', 'yuv420p']
+    encoder_index = next((i + 1 for i, value in enumerate(configured[:-1]) if value == '-c:v'), None)
+    if encoder_index is None:
+        return configured
+    encoder = configured[encoder_index]
+    quality_index = next((i + 1 for i, value in enumerate(configured[:-1]) if value == '-cq'), None)
+    quality = configured[quality_index] if quality_index is not None else '23'
+
+    if not force_cpu and encoder in encoders:
+        if encoder.endswith('_nvenc') and backend == 'cuda' and 'nvidia' in vendor:
+            return configured
+        if encoder.endswith('_nvenc') and os.name == 'nt' and (backend in ('amd', 'rocm', 'directml') or 'amd' in vendor or 'radeon' in vendor):
+            amf_encoder = encoder[:-6] + '_amf'
+            if amf_encoder in encoders:
+                return ['-c:v', amf_encoder, '-quality', 'balanced', '-rc', 'cqp', '-qp_i', quality, '-qp_p', quality, '-pix_fmt', 'yuv420p']
+
+    cpu_encoder = 'libx265' if encoder.startswith('hevc') else 'libx264'
+    return ['-c:v', cpu_encoder, '-preset', 'medium', '-crf', quality, '-pix_fmt', 'yuv420p']
 
 class TimelineManager:
     def __init__(self, timestamps: Optional[List[Timestamp]], source_dur: float = .0):
@@ -267,9 +299,12 @@ def build_subtitles(v_cur: str, subs: List[Transcribe], W: int, H: int, source: 
     v_n = 'v_sub'
     return f"[{v_cur}]subtitles=filename='{p}'[{v_n}]", v_n, ass
 
-def video_complex(source: Path, timestamps: Optional[List[Timestamp]], audios: Optional[List[Clip_Audio]], subtitles: Optional[List[Transcribe]] = None, images: Optional[List[Clip_Video]] = None, blurs: Optional[List[Polygon]] = None, target: Optional[Path] = None, subtitle_style: Optional[Subtitle] = None) -> Path:
+def video_complex(source: Path, timestamps: Optional[List[Timestamp]], audios: Optional[List[Clip_Audio]], subtitles: Optional[List[Transcribe]] = None, images: Optional[List[Clip_Video]] = None, blurs: Optional[List[Polygon]] = None, target: Optional[Path] = None, subtitle_style: Optional[Subtitle] = None, _force_cpu: bool = False) -> Path:
     target = target or source.with_name(source.stem + '_final.mp4')
-    W, H = get_video_size(source)
+    soft_render = SOFT_RENDER
+    if soft_render and timestamps:
+        LG.ln('SOFT_RENDER keeps the complete source video; trim timestamps are ignored.', LG.Y)
+        timestamps = None
     tm = TimelineManager(timestamps, get_media_duration(source))
     ui = []
     def get_idx(p, loop=False):
@@ -277,11 +312,12 @@ def video_complex(source: Path, timestamps: Optional[List[Timestamp]], audios: O
         k = str(p), loop
         if k not in ui: ui.append(k)
         return ui.index(k) + 1
-    img_map = [get_idx(i.source.path, str(i.source.path).lower().endswith('.gif')) for i in (images or [])]
+    img_map = [] if soft_render else [get_idx(i.source.path, str(i.source.path).lower().endswith('.gif')) for i in (images or [])]
     aud_map = [get_idx(a.source.path, a.repeat) for a in (audios or [])]
     base_dir = source.parent
-    cmd = ['ffmpeg', '-y', '-progress', 'pipe:1']
-    hw_in = [x for (i, x) in enumerate(MM.HARDWARE) if x == '-hwaccel' or (i > 0 and MM.HARDWARE[i - 1] == '-hwaccel')]
+    cmd = [MM.BIN, '-y', '-progress', 'pipe:1']
+    hardware_args = [] if soft_render else get_render_hardware_args(force_cpu=_force_cpu)
+    hw_in = [x for (i, x) in enumerate(hardware_args) if x == '-hwaccel' or (i > 0 and hardware_args[i - 1] == '-hwaccel')]
     cmd += hw_in
     if getattr(MM, 'ffmpeg_level', None): cmd += ['-loglevel', MM.ffmpeg_level]
     cmd += ['-i', os.path.relpath(source, base_dir)]
@@ -290,26 +326,33 @@ def video_complex(source: Path, timestamps: Optional[List[Timestamp]], audios: O
         elif loop: cmd += ['-stream_loop', '-1']
         cmd += ['-i', os.path.relpath(Path(p), base_dir)]
     fg = []
-    ft, v_c = build_video_trim(timestamps, W, H)
-    if ft: fg.append(ft)
-    if blurs:
-        f, v_c = build_movement_blurs(v_c, blurs, tm, W, H)
-        if f: fg.append(f)
-    if images:
-        f, v_c = build_images(v_c, images, tm, img_map, W, H)
-        if f: fg.append(f)
     p_ass = None
-    if subtitles:
-        style_to_use = subtitle_style or Subtitle()
-        f, v_temp, p_ass = build_subtitles(v_c, subtitles, W, H, source, style_to_use, tm=tm)
-        if f: fg.append(f); v_c = v_temp
+    if soft_render:
+        v_c = '0:v:0'
+    else:
+        W, H = get_video_size(source)
+        ft, v_c = build_video_trim(timestamps, W, H)
+        if ft: fg.append(ft)
+        if blurs:
+            f, v_c = build_movement_blurs(v_c, blurs, tm, W, H)
+            if f: fg.append(f)
+        if images:
+            f, v_c = build_images(v_c, images, tm, img_map, W, H)
+            if f: fg.append(f)
+        if subtitles:
+            style_to_use = subtitle_style or Subtitle()
+            f, v_temp, p_ass = build_subtitles(v_c, subtitles, W, H, source, style_to_use, tm=tm)
+            if f: fg.append(f); v_c = v_temp
     fg.append(build_audios(audios or [], tm, aud_map))
     fpath = source.parent / source.stem / f"{source.stem}_filter.txt"
     fpath.parent.mkdir(parents=True, exist_ok=True)
-    with open(fpath, 'w', encoding='utf-8') as f: f.write(';\n'.join(filter(None, fg)))
-    cmd += ['-filter_complex_script', os.path.relpath(fpath, base_dir), '-map', f"[{v_c}]", '-map', '[aout]']
-    hw_out = [x for x in MM.HARDWARE if x not in hw_in]
+    filter_graph = ';\n'.join(filter(None, fg))
+    with open(fpath, 'w', encoding='utf-8') as f: f.write(filter_graph)
+    video_map = v_c if soft_render else f"[{v_c}]"
+    cmd += ['-filter_complex', filter_graph, '-map', video_map, '-map', '[aout]']
+    hw_out = [x for x in hardware_args if x not in hw_in]
     cmd += hw_out
+    if soft_render: cmd += ['-c:v', 'copy']
     cmd += ['-c:a', 'aac', '-b:a', '192k', '-t', f"{tm.total_dur:.3f}", os.path.relpath(target, base_dir)]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, encoding='utf-8', errors='replace', cwd=base_dir)
     dur = round(tm.total_dur, 2)
@@ -325,6 +368,10 @@ def video_complex(source: Path, timestamps: Optional[List[Timestamp]], audios: O
     process.wait()
     if process.returncode != 0:
         LG.ln(f"\n❌ FFmpeg Error:\n{stderr_output}", LG.R)
+        if not _force_cpu and any(any(name in value for name in ('_nvenc', '_amf', '_vaapi', '_qsv')) for value in hardware_args):
+            LG.ln('GPU render failed; retrying with CPU encoder.', LG.Y)
+            target.unlink(missing_ok=True)
+            return video_complex(source, timestamps, audios, subtitles, images, blurs, target, subtitle_style, _force_cpu=True)
         raise subprocess.CalledProcessError(process.returncode, cmd, output=stderr_output)
     LG.cl(1); LG.ln('✅ Render successfully!', LG.G)
     if not is_use.o_ff_filter:

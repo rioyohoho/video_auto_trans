@@ -4,6 +4,7 @@ from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 from huggingface_hub import snapshot_download
 from src.configuration import XTTS_REPO_ID,XTTS_DIR_PATH,TAR_LANG,XTTS_TMP_VOICE
+from src.utils.hardware import get_torch_backend
 
 class XTTS_C:
 	temperature=0.6
@@ -20,7 +21,8 @@ class XTTSProcessor:
 		return cls._inst
 	def __init__(self,ckpt:str=str(XTTS_DIR_PATH)):
 		if self._init: return
-		self.ckpt,self.dev,self.m,self._init=ckpt,"cuda" if torch.cuda.is_available() else "cpu",None,True
+		backend,_=get_torch_backend()
+		self.ckpt,self.dev,self.m,self._init=ckpt,"cuda" if backend in ("cuda","rocm") else "cpu",None,True
 	def get_model(self)->Xtts:
 		if self.m: return self.m
 		os.makedirs(self.ckpt,exist_ok=True)
