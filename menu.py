@@ -231,7 +231,7 @@ class MenuApp(App):
             ta.allow_select = True
             ta.clear()
             self.log_buffer = ""
-            self.query_one("#log_bar", Label).update("🧹 Đã xóa log.")
+            self.query_one("#log_bar", Label).update("! Đã xóa log.")
 
     def _copy_to_clipboard(self, payload: str) -> None:
         try:
@@ -256,12 +256,12 @@ class MenuApp(App):
         if not payload:
             payload = ta.text.strip()
         if not payload:
-            self.query_one("#log_bar", Label).update("ℹ️ Chưa có nội dung để copy.")
+            self.query_one("#log_bar", Label).update("! Chưa có nội dung để copy.")
             return
 
         self._copy_to_clipboard(payload)
-        self.query_one("#log_bar", Label).update("✅ Đã copy log vào clipboard.")
-        self.set_timer(1.2, lambda: self.query_one("#log_bar", Label).update("⏳ Đang chạy... Vui lòng đợi." if self.task_running else "✅ Đã xong toàn bộ! Nhấn ENTER để quay lại Menu"))
+        self.query_one("#log_bar", Label).update("! Đã copy log vào clipboard.")
+        self.set_timer(1.2, lambda: self.query_one("#log_bar", Label).update("⏳ Đang chạy... Vui lòng đợi." if self.task_running else "! Đã xong toàn bộ! Nhấn ENTER để quay lại Menu"))
 
     def stop_current_process(self) -> None:
         proc = self.current_proc
@@ -270,10 +270,10 @@ class MenuApp(App):
                 proc.terminate()
             except Exception:
                 pass
-            self.query_one("#log_bar", Label).update("🛑 Đã gửi Ctrl+C để dừng tiến trình.")
+            self.query_one("#log_bar", Label).update("! Đã gửi Ctrl+C để dừng tiến trình.")
             self.set_timer(0.7, lambda: self._force_stop_current_process(proc))
         else:
-            self.query_one("#log_bar", Label).update("ℹ️ Không có tiến trình đang chạy.")
+            self.query_one("#log_bar", Label).update("! Không có tiến trình đang chạy.")
 
     def _force_stop_current_process(self, proc) -> None:
         if proc and proc.poll() is None:
@@ -336,7 +336,7 @@ class MenuApp(App):
         self.log_buffer = self.log_buffer.rstrip() + ("\r" + text if self.log_buffer else text)
         ta = self.query_one("#console_log", TextArea)
         ta.insert(ta.text + text)
-        self.query_one("#log_bar", Label).update(f"📊 {text.strip()}")
+        self.query_one("#log_bar", Label).update(f">>> {text.strip()}")
 
     @work(thread=True)
     def run_pipeline(self, scripts: list) -> None:
@@ -396,7 +396,7 @@ class MenuApp(App):
             self.app.call_from_thread(self._write_log, f"\033[32m[XONG {script}] Exit code: {proc.returncode}\033[0m\n\n")
 
         self.task_running = False
-        self.app.call_from_thread(bar.update, "✅ Đã xong toàn bộ! Nhấn ENTER để quay lại Menu")
+        self.app.call_from_thread(bar.update, "! Đã xong toàn bộ! Nhấn ENTER để quay lại Menu")
 
     def _reset_log_area(self) -> None:
         ta = self.query_one("#console_log", TextArea)
