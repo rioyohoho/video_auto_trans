@@ -1,8 +1,8 @@
-import os, sys, subprocess, platform, pyperclip
+import os, sys, subprocess, platform, pyperclip, re, time
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll, Horizontal, Vertical
-from textual.widgets import Header, Footer, Label, Input, Checkbox, Button, RichLog, Select
+from textual.widgets import Header, Footer, Label, Input, Checkbox, Button, Select, TextArea
 from textual.events import Click
 from rich.text import Text
 from src.enties import agr, Canvas
@@ -17,8 +17,9 @@ AREA_OPTIONS = [
     ("BR (3)", str(Canvas.Area.BR.value)), ("TL (7)", str(Canvas.Area.TL.value)),
     ("TR (9)", str(Canvas.Area.TR.value)), ("CL (4)", str(Canvas.Area.CL.value)),
     ("CR (6)", str(Canvas.Area.CR.value)), ("CM (5)", str(Canvas.Area.CM.value)),
-    ("DEFAULT (0)", str(Canvas.Area.DEFAULT.value))
+    ("DEFAULT (0)", str(Canvas.Area.DEFAULT.value)),
 ]
+
 DEFAULT_DATA = {
     "s0_demucs.py": ["Separation", [("-m", [("voc (Vocal)", "voc"), ("inst (Music)", "inst")])]],
     "s1_transcribe.py": ["Transcribe", [("-l", "auto"), ("-c-bs", 5), ("-c-wt", True), ("-c-copt", False), ("-c-vf", True)]],
@@ -28,24 +29,37 @@ DEFAULT_DATA = {
     "s4_srt.py": ["Word-Level SRT", [("-l", ",".join(LANGS)), ("-w", 5), ("-k", "#00aaff"), ("-c-bs", 5), ("-c-wt", True), ("-c-copt", False), ("-c-vf", True)]],
     "s5_ocr_delogo.py": ["OCR Delogo / Desub", [("-a", AREA_OPTIONS), ("-am", True), ("-tm", False)]],
     "s5.1_ocr_delogo_gui.py": ["GUI - Manual", [("-a", AREA_OPTIONS), ("-am", True), ("-tm", False)]],
-    "s6_video_complex.py": ["Render Video Complex", [("-l", TAR_LANG), ("-c", str(RENDER_CONFIG)), ("-st", 0.0), ("-en", 0.0)]]
+    "s6_video_complex.py": ["Render Video Complex", [("-l", TAR_LANG), ("-c", str(RENDER_CONFIG)), ("-st", 0.0), ("-en", 0.0)]],
 }
 
+
 def resolve_input_path(init_path: str = None) -> str:
-    if init_path and os.path.exists(init_path): return os.path.abspath(init_path)
-    system = platform.system(); p = None
+    if init_path and os.path.exists(init_path):
+        return os.path.abspath(init_path)
+
+    system = platform.system()
+    p = None
     if system == 'Windows':
         cmd = "Add-Type -AssemblyName System.Windows.Forms; $dlg = New-Object System.Windows.Forms.OpenFileDialog; $dlg.Filter = 'Video Files (*.mp4;*.avi;*.mkv)|*.mp4;*.avi;*.mkv|All Files (*.*)|*.*'; [void]$dlg.ShowDialog(); $dlg.FileName"
         p = subprocess.run(['powershell', '-Command', cmd], capture_output=True, text=True).stdout.strip()
     elif system == 'Darwin':
         p = subprocess.run(['osascript', '-e', 'POSIX path of (choose file of type {"public.movie"} with prompt "Chọn file video:")'], capture_output=True, text=True).stdout.strip()
     elif system == 'Linux':
-        try: p = subprocess.run(['zenity', '--file-selection'], capture_output=True, text=True).stdout.strip()
-        except: pass
+        try:
+            p = subprocess.run(['zenity', '--file-selection'], capture_output=True, text=True).stdout.strip()
+        except Exception:
+            pass
     return os.path.abspath(p) if p and os.path.exists(p) else ''
 
+
 class MenuApp(App):
-    BINDINGS = [("q", "quit", "Quit"), ("escape", "quit", "Exit"), ("enter", "back_to_menu", "Back to Menu")]
+    BINDINGS = [
+        ("q", "quit", "Quit"),
+        ("escape", "quit", "Exit"),
+        ("enter", "back_to_menu", "Back to Menu"),
+        ("ctrl+l", "clear_log", "Clear log"),
+        ("ctrl+c", "copy_log", "Copy log"),
+    ]
     CSS = """
     Screen { background: #0f1117; }
     Header { background: #161922; color: #a1a1aa; height: 1; }
@@ -82,13 +96,24 @@ class MenuApp(App):
     .btn-exit { min-width: 8; height: 1; min-height: 1; border: none; background: #ef4444; color: #000000; text-style: bold; }
     .btn-exit:hover { background: #dc2626; }
     #log_view { height: 1fr; background: #161922; border: solid #27272a; padding: 1; display: none; }
-    RichLog { background: #0f1117; color: #d4d4d8; height: 1fr; }
+    .log-toolbar { height: 3; background: #161922; border: solid #27272a; align: left middle; padding: 0 1; }
+    .btn-log-clear { min-width: 8; height: 1; min-height: 1; border: none; background: #64748b; color: #ffffff; text-style: bold; margin-right: 1; }
+    .btn-log-clear:hover { background: #475569; }
+    .btn-log-stop { min-width: 8; height: 1; min-height: 1; border: none; background: #ef4444; color: #000000; text-style: bold; margin-right: 1; }
+    .btn-log-stop:hover { background: #dc2626; }
+    .btn-log-copy { min-width: 8; height: 1; min-height: 1; border: none; background: #eab308; color: #000000; text-style: bold; }
+    .btn-log-copy:hover { background: #ca8a04; }
+    TextArea { background: #0f1117; color: #d4d4d8; height: 1fr; }
     #log_bar { height: 1; align: center middle; background: #222634; color: #22c55e; text-style: bold; }
     """
 
     def __init__(self, input_path: str):
         super().__init__()
-        self.input_path, self.controls, self.task_checks, self.label_targets, self.task_running = input_path, {}, {}, {}, False
+        self.input_path = input_path
+        self.controls, self.task_checks, self.label_targets, self.task_running = {}, {}, {}, False
+        self.current_proc = None
+        self.log_buffer = ""
+        self.last_ctrl_c_time = 0.0
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -142,7 +167,11 @@ class MenuApp(App):
                     yield Button("Run All", id="btn_run_all", classes="btn-run-all")
                 yield Button("Exit", id="btn_exit", classes="btn-exit")
         with Vertical(id="log_view"):
-            yield RichLog(id="console_log", wrap=True, highlight=False, markup=False)
+            with Horizontal(classes="log-toolbar"):
+                yield Button("Clear", id="btn_clear_log", classes="btn-log-clear")
+                yield Button("Stop", id="btn_stop_proc", classes="btn-log-stop")
+                yield Button("Copy", id="btn_copy_log", classes="btn-log-copy")
+            yield TextArea(id="console_log", wrap=True, highlight=False, markup=False)
             yield Label("⏳ Đang chạy... Vui lòng đợi.", id="log_bar")
         yield Footer()
 
@@ -157,8 +186,10 @@ class MenuApp(App):
     def on_click(self, event: Click) -> None:
         target = self.label_targets.get(event.widget)
         if target:
-            if isinstance(target, Checkbox): target.value = not target.value
-            else: target.focus()
+            if isinstance(target, Checkbox):
+                target.value = not target.value
+            else:
+                target.focus()
 
     def on_input_changed(self, event: Input.Changed) -> None:
         event.input.styles.width = max(8, len(event.value) + 3)
@@ -167,11 +198,14 @@ class MenuApp(App):
         if event.select.id == "global_lang" and event.value != Select.BLANK:
             val = str(event.value)
             for script, params in self.controls.items():
-                if script == "s1_transcribe.py": continue
+                if script == "s1_transcribe.py":
+                    continue
                 for flag, ctrl, ctype in params:
                     if flag == "-l":
-                        if ctype == "val": ctrl.value = val
-                        elif ctype == "select" and val in [opt[1] for opt in ctrl._options]: ctrl.value = val
+                        if ctype == "val":
+                            ctrl.value = val
+                        elif ctype == "select" and val in [opt[1] for opt in ctrl._options]:
+                            ctrl.value = val
 
     def on_checkbox_changed(self, event: Checkbox.Changed) -> None:
         cid = event.checkbox.id or ""
@@ -179,7 +213,8 @@ class MenuApp(App):
             for script, cb in self.task_checks.items():
                 cb.value = (event.value and script not in ("s3_AI_speech.py", "s5.1_ocr_delogo_gui.py")) if event.value else False
         elif event.checkbox == self.task_checks.get("s3_Google_speech.py") and event.value:
-            if "s3_AI_speech.py" in self.task_checks: self.task_checks["s3_AI_speech.py"].value = False
+            if "s3_AI_speech.py" in self.task_checks:
+                self.task_checks["s3_AI_speech.py"].value = False
         elif event.checkbox == self.task_checks.get("s3_AI_speech.py") and event.value:
             if self.task_checks.get("s3_Google_speech.py", None) and self.task_checks["s3_Google_speech.py"].value:
                 event.checkbox.value = False
@@ -189,13 +224,89 @@ class MenuApp(App):
             self.query_one("#log_view").display = False
             self.query_one("#menu_view").display = True
 
+    def action_clear_log(self) -> None:
+        if self.query_one("#log_view").display:
+            ta = self.query_one("#console_log", TextArea)
+            ta.read_only = False
+            ta.allow_select = True
+            ta.clear()
+            self.log_buffer = ""
+            self.query_one("#log_bar", Label).update("🧹 Đã xóa log.")
+
+    def _copy_to_clipboard(self, payload: str) -> None:
+        try:
+            pyperclip.copy(payload)
+        except Exception:
+            try:
+                subprocess.run("clip", input=payload, text=True, shell=True, check=False)
+            except Exception:
+                pass
+
+    def action_copy_log(self) -> None:
+        now = time.monotonic()
+        if self.current_proc and (now - self.last_ctrl_c_time <= 1.0):
+            self.last_ctrl_c_time = 0.0
+            self.stop_current_process()
+            return
+
+        self.last_ctrl_c_time = now
+        ta = self.query_one("#console_log", TextArea)
+        selected = ta.selected_text.strip()
+        payload = selected if selected else self.log_buffer.strip()
+        if not payload:
+            payload = ta.text.strip()
+        if not payload:
+            self.query_one("#log_bar", Label).update("ℹ️ Chưa có nội dung để copy.")
+            return
+
+        self._copy_to_clipboard(payload)
+        self.query_one("#log_bar", Label).update("✅ Đã copy log vào clipboard.")
+        self.set_timer(1.2, lambda: self.query_one("#log_bar", Label).update("⏳ Đang chạy... Vui lòng đợi." if self.task_running else "✅ Đã xong toàn bộ! Nhấn ENTER để quay lại Menu"))
+
+    def stop_current_process(self) -> None:
+        proc = self.current_proc
+        if proc and proc.poll() is None:
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+            self.query_one("#log_bar", Label).update("🛑 Đã gửi Ctrl+C để dừng tiến trình.")
+            self.set_timer(0.7, lambda: self._force_stop_current_process(proc))
+        else:
+            self.query_one("#log_bar", Label).update("ℹ️ Không có tiến trình đang chạy.")
+
+    def _force_stop_current_process(self, proc) -> None:
+        if proc and proc.poll() is None:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+
+    def on_key(self, event) -> None:
+        key = (event.key or "").lower()
+        if key == "ctrl+c":
+            self.action_copy_log()
+            event.stop()
+        elif key == "ctrl+l":
+            self.action_clear_log()
+            event.stop()
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_id = event.button.id or ""
-        if btn_id == "btn_exit": return self.exit()
+        if btn_id == "btn_exit":
+            return self.exit()
+        if btn_id == "btn_clear_log":
+            return self.action_clear_log()
+        if btn_id == "btn_stop_proc":
+            return self.stop_current_process()
+        if btn_id == "btn_copy_log":
+            return self.action_copy_log()
         if btn_id == "btn_run_all":
             targets = [s for s, cb in self.task_checks.items() if cb.value]
-            if "s3_Google_speech.py" in targets and "s3_AI_speech.py" in targets: targets.remove("s3_AI_speech.py")
-            if targets: self.run_pipeline(targets)
+            if "s3_Google_speech.py" in targets and "s3_AI_speech.py" in targets:
+                targets.remove("s3_AI_speech.py")
+            if targets:
+                self.run_pipeline(targets)
             return
         for script in DEFAULT_DATA.keys():
             s_key = script.replace('.', '_')
@@ -204,43 +315,92 @@ class MenuApp(App):
                 break
             elif btn_id == f"cp_{s_key}":
                 cmd = " ".join(self.build_cmd(script))
-                try: pyperclip.copy(cmd)
-                except: subprocess.run("clip", input=cmd, text=True, shell=True)
+                try:
+                    pyperclip.copy(cmd)
+                except Exception:
+                    subprocess.run("clip", input=cmd, text=True, shell=True, check=False)
                 event.button.label = "✓"
                 self.set_timer(1.2, lambda b=event.button: setattr(b, "label", "Copy"))
                 break
 
+    def _write_log(self, text: str) -> None:
+        if not text:
+            return
+        self.log_buffer += text
+        ta = self.query_one("#console_log", TextArea)
+        ta.insert(ta.text + text)
+
+    def _write_progress(self, text: str) -> None:
+        if not text:
+            return
+        self.log_buffer = self.log_buffer.rstrip() + ("\r" + text if self.log_buffer else text)
+        ta = self.query_one("#console_log", TextArea)
+        ta.insert(ta.text + text)
+        self.query_one("#log_bar", Label).update(f"📊 {text.strip()}")
+
     @work(thread=True)
     def run_pipeline(self, scripts: list) -> None:
         self.task_running = True
-        log, bar = self.query_one(RichLog), self.query_one("#log_bar", Label)
-        self.app.call_from_thread(log.clear)
         self.app.call_from_thread(setattr, self.query_one("#menu_view"), "display", False)
         self.app.call_from_thread(setattr, self.query_one("#log_view"), "display", True)
+        self.app.call_from_thread(self._reset_log_area)
+        self.log_buffer = ""
         total = len(scripts)
+
         for idx, script in enumerate(scripts, 1):
+            bar = self.query_one("#log_bar", Label)
             self.app.call_from_thread(bar.update, f"⏳ [{idx}/{total}] Đang chạy {script}...")
             cmd_args = [sys.executable, "-u", os.path.join(BASE_DIR, script), "-i", self.input_path]
             for flag, ctrl, ctype in self.controls.get(script, []):
                 cmd_args.append(flag)
-                if ctype in ("bool", "select"): cmd_args.append(str(ctrl.value))
-                else: cmd_args.append(ctrl.value.strip('"\''))
+                if ctype in ("bool", "select"):
+                    cmd_args.append(str(ctrl.value))
+                else:
+                    cmd_args.append(ctrl.value.strip('"\''))
             sub_env = os.environ.copy()
             sub_env["PYTHONIOENCODING"], sub_env["PYTHONUTF8"] = "utf-8", "1"
-            log.write(Text.from_ansi(f"\033[36m[START {idx}/{total}]\033[0m {' '.join(cmd_args)}\n"))
-            proc = subprocess.Popen(cmd_args, cwd=BASE_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace', bufsize=1, env=sub_env)
-            for line in iter(proc.stdout.readline, ''):
-                if not line: continue
-                raw = line.rstrip('\r\n')
-                if '\r' in line or '%"' in line or 'RENDERING' in line: self.app.call_from_thread(bar.update, Text.from_ansi(raw.strip()))
-                else: log.write(Text.from_ansi(raw))
-            proc.stdout.close(); proc.wait()
-            color = "\033[32m" if proc.returncode == 0 else "\033[31m"
-            log.write(Text.from_ansi(f"\n{color}[XONG {script}] Exit code: {proc.returncode}\033[0m\n\n"))
+            self.app.call_from_thread(self._write_log, f"\033[36m[START {idx}/{total}]\033[0m {' '.join(cmd_args)}\n")
+
+            proc = subprocess.Popen(
+                cmd_args,
+                cwd=BASE_DIR,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                bufsize=1,
+                env=sub_env,
+            )
+            self.current_proc = proc
+            try:
+                while True:
+                    line = proc.stdout.readline()
+                    if not line:
+                        break
+                    raw = line.rstrip("\r\n")
+                    if not raw:
+                        continue
+                    if re.search(r"(\d+%|RENDERING)", raw, flags=re.IGNORECASE):
+                        self.app.call_from_thread(self._write_progress, raw)
+                    else:
+                        self.app.call_from_thread(self._write_log, raw + "\n")
+            finally:
+                self.current_proc = None
+                try:
+                    proc.stdout.close()
+                except Exception:
+                    pass
+                proc.wait()
+
+            self.app.call_from_thread(self._write_log, f"\033[32m[XONG {script}] Exit code: {proc.returncode}\033[0m\n\n")
+
         self.task_running = False
         self.app.call_from_thread(bar.update, "✅ Đã xong toàn bộ! Nhấn ENTER để quay lại Menu")
 
-if __name__ == '__main__':
-    args = handle_input(agr(('-i', '--input'), default=None))
-    target_path = resolve_input_path(args.input)
-    MenuApp(input_path=target_path).run()
+    def _reset_log_area(self) -> None:
+        ta = self.query_one("#console_log", TextArea)
+        ta.clear()
+        ta.read_only = False
+        ta.allow_select = True
+        ta.focus()
