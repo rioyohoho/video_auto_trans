@@ -66,7 +66,10 @@ def collect_video_paths(init_input)->list:
     return list(dict.fromkeys(valid_videos))
 
 def build_cmd(script:str,input_path:str)->list:
-    args=[sys.executable,"-u",os.path.join(BASE_DIR,script),"-i",input_path]
+    if getattr(sys,"frozen",False):
+        executable=os.path.join(os.path.dirname(sys.executable),f"{Path(script).stem}.exe")
+        args=[executable,"-i",input_path]
+    else:args=[sys.executable,"-u",os.path.join(BASE_DIR,script),"-i",input_path]
     for flag,val in DEFAULT_DATA.get(script,[]):args.extend([flag,str(val)])
     return args
 
@@ -169,6 +172,7 @@ def main():
         txt.yellow("⚠️ Warning: No tasks enabled to execute.")
         return
     size,total_tasks=len(video_list),len(selected_tasks)
+    had_failures=False
     for i,video_path in enumerate(video_list,1):
         txt.yellow(f'[{i}/{size}] "{video_path}"')
         for idx,script in enumerate(selected_tasks,1):
@@ -179,11 +183,16 @@ def main():
             cmd_args=build_cmd(script,video_path)
             txt.white(f"🚀 [{idx}/{total_tasks}] Launching: {script}")
             exit_code=run_cmd(cmd_args,script,new_window=bool(args.new_window))
+            if exit_code==0 and expected_outs and not check_outputs_exist(expected_outs):
+                txt.red(f"❌ Process {script} exited successfully but expected outputs are missing.")
+                exit_code=1
             if exit_code!=0:txt.red(f"❌ Process {script} failed (Exit code: {exit_code})")
             else:
                 for p_out in get_expected_outputs(script,video_path):
                     if p_out.exists()and p_out.stat().st_size>0:txt.green(f'[DONE]: "{str(p_out)}"')
                 txt.green(f"✅ Completed successfully: {script}")
+            if exit_code!=0:had_failures=True
+    if had_failures:sys.exit(1)
     txt.cyan("\n🎉 ALL PIPELINE TASKS COMPLETED FOR ALL VIDEOS!")
 
 if __name__=='__main__':main()

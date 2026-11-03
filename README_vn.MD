@@ -15,11 +15,17 @@ python -m pip install -r requirements.txt
 
 **GPU tùy chọn**
 
-NVIDIA: thay backend CPU mặc định bằng extra GPU, đồng thời cài PyTorch phù hợp với phiên bản CUDA mà driver hỗ trợ:
+ NVIDIA: dùng runtime CUDA 12.8 đồng bộ. Cấu hình này hỗ trợ RTX 50-series và tương thích với CTranslate2 của Whisper:
 ```powershell
-python -m pip uninstall -y audio-separator onnxruntime
-python -m pip install "audio-separator[gpu]"
-python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+python -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml torch torchvision torchaudio
+python -m pip install onnxruntime-gpu==1.26.0
+python -m pip install torch==2.11.0+cu128 torchvision==0.26.0+cu128 torchaudio==2.11.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+```
+
+AMD trên Windows: dùng DirectML thay cho các gói NVIDIA/CUDA:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
+python -m pip install "audio-separator[dml]"
 ```
 
 AMD trên Windows: dùng DirectML thay cho các gói NVIDIA/CUDA:
