@@ -12,7 +12,7 @@ from textual.widgets import Button, Checkbox, Footer, Header, Label, RichLog
 
 
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / "builds"
+OUTPUT_DIR = BASE_DIR / "apps"
 BUILD_DIR = BASE_DIR / "build" / "pyinstaller"
 TARGETS = [
     ("exec_soft_render.py", "Soft Render Pipeline"),
