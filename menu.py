@@ -4,9 +4,8 @@ from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll, Horizontal, Vertical
 from textual.widgets import Header, Footer, Label, Input, Checkbox, Button, Select, TextArea
 from textual.events import Click
-from rich.text import Text
-from src.enties import agr, Canvas
-from src.utils import handle_input
+from pathlib import Path
+from src.enties import Canvas
 from src.configuration import TAR_LANG, LANGS, XTTS_TMP_VOICE, RENDER_CONFIG
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -187,8 +186,8 @@ class MenuApp(App):
 
     def script_command(self, script: str, input_path: str) -> list:
         if getattr(sys, "frozen", False):
-            executable = os.path.join(os.path.dirname(sys.executable), f"{os.path.splitext(script)[0]}.exe")
-            return [executable, "-i", input_path]
+            executable = Path(sys.executable).resolve().parent / f"{Path(script).stem}.exe"
+            return [str(executable), "-i", input_path]
         return [sys.executable, "-u", os.path.join(BASE_DIR, script), "-i", input_path]
 
     def on_click(self, event: Click) -> None:
@@ -382,7 +381,7 @@ class MenuApp(App):
             )
             self.current_proc = proc
             try:
-                while True:
+                while time.time() >= 0:
                     line = proc.stdout.readline()
                     if not line:
                         break
