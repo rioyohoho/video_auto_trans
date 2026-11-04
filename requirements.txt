@@ -14,7 +14,6 @@ pyperclip
 python-dotenv
 PyQt6
 textual
-pyinstaller
 rich
 deep-translator
 translators
