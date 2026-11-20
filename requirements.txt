@@ -1,11 +1,9 @@
 # Cross-platform baseline; install from the project root with:
 #   python -m pip install -r requirements.txt
-#
 # audio-separator[cpu] is the portable default. For NVIDIA, replace it with
-# audio-separator[gpu]. For AMD on Windows, replace it with
-# audio-separator[dml]. Do not install multiple ONNX Runtime variants together.
-# Install the matching PyTorch/torchaudio build for CPU, CUDA, or ROCm separately
-# when your platform requires a vendor-specific wheel/index.
+# audio-separator[gpu]. For AMD on Windows, replace it with audio-separator[dml].
+# Do not install multiple ONNX Runtime variants together. Install a matching
+# PyTorch build for CPU, CUDA, or ROCm separately when required.
 # FFmpeg and ffprobe must be installed separately and available on PATH.
 
 colorama

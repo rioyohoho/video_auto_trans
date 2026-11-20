@@ -4,9 +4,8 @@ from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll, Horizontal, Vertical
 from textual.widgets import Header, Footer, Label, Input, Checkbox, Button, Select, TextArea
 from textual.events import Click
-from rich.text import Text
-from src.enties import agr, Canvas
-from src.utils import handle_input
+from pathlib import Path
+from src.enties import Canvas
 from src.configuration import TAR_LANG, LANGS, XTTS_TMP_VOICE, RENDER_CONFIG
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -176,12 +175,20 @@ class MenuApp(App):
         yield Footer()
 
     def build_cmd(self, script: str) -> list:
-        args = [sys.executable, "-u", os.path.join(BASE_DIR, script), "-i", f'"{self.input_path}"' if ' ' in self.input_path else self.input_path]
+        args = self.script_command(script, self.input_path)
+        if ' ' in self.input_path:
+            args[-1] = f'"{self.input_path}"'
         for flag, ctrl, ctype in self.controls.get(script, []):
             args.append(flag)
             val = str(ctrl.value) if ctype in ("bool", "select") else ctrl.value.strip('"\'')
             args.append(f'"{val}"' if ' ' in val else val)
         return args
+
+    def script_command(self, script: str, input_path: str) -> list:
+        if getattr(sys, "frozen", False):
+            executable = Path(sys.executable).resolve().parent / f"{Path(script).stem}.exe"
+            return [str(executable), "-i", input_path]
+        return [sys.executable, "-u", os.path.join(BASE_DIR, script), "-i", input_path]
 
     def on_click(self, event: Click) -> None:
         target = self.label_targets.get(event.widget)
@@ -350,7 +357,7 @@ class MenuApp(App):
         for idx, script in enumerate(scripts, 1):
             bar = self.query_one("#log_bar", Label)
             self.app.call_from_thread(bar.update, f"⏳ [{idx}/{total}] Đang chạy {script}...")
-            cmd_args = [sys.executable, "-u", os.path.join(BASE_DIR, script), "-i", self.input_path]
+            cmd_args = self.script_command(script, self.input_path)
             for flag, ctrl, ctype in self.controls.get(script, []):
                 cmd_args.append(flag)
                 if ctype in ("bool", "select"):
@@ -374,7 +381,7 @@ class MenuApp(App):
             )
             self.current_proc = proc
             try:
-                while True:
+                while time.time() >= 0:
                     line = proc.stdout.readline()
                     if not line:
                         break

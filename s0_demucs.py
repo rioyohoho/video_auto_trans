@@ -12,7 +12,7 @@ def run(ws:Workspace):
         txt.magenta(f'[PASS] "{str(mus_dst)}"')
         return
     try:
-        process.separate(source=ws.media_path,output=ws.work_dir)
+        process.separate(source=ws.media_path,output=ws.work_dir,is_clean_music=False)
         v_out,m_out=ws.work_dir/f"{ws.stem}_{demucs.C.n_voice}.mp3",ws.work_dir/f"{ws.stem}_{demucs.C.n_instrumental}.mp3"
         if v_out.exists()and v_out!=voc_dst:v_out.rename(voc_dst)
         if m_out.exists()and m_out!=mus_dst:m_out.rename(mus_dst)

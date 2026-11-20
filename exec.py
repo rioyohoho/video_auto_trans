@@ -66,7 +66,11 @@ def collect_video_paths(init_input)->list:
     return list(dict.fromkeys(valid_videos))
 
 def build_cmd(script:str,input_path:str)->list:
-    args=[sys.executable,"-u",os.path.join(BASE_DIR,script),"-i",input_path]
+    if getattr(sys, "frozen", False):
+        executable = Path(sys.executable).resolve().parent / f"{Path(script).stem}.exe"
+        args=[str(executable),"-i",input_path]
+    else:
+        args=[sys.executable,"-u",os.path.join(BASE_DIR,script),"-i",input_path]
     for flag,val in DEFAULT_DATA.get(script,[]):args.extend([flag,str(val)])
     return args
 

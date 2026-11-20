@@ -15,11 +15,17 @@ The requirements file uses the CPU ONNX Runtime extra by default. Install only o
 
 **Optional GPU backends**
 
-NVIDIA: replace the default audio-separator CPU backend with its GPU extra, and install a PyTorch build matching the CUDA version supported by your driver:
+ NVIDIA: use matching CUDA 12.8 runtimes. This is supported by RTX 50-series GPUs and also works with CTranslate2 used by Whisper:
 ```powershell
-python -m pip uninstall -y audio-separator onnxruntime
-python -m pip install "audio-separator[gpu]"
-python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+python -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml torch torchvision torchaudio
+python -m pip install onnxruntime-gpu==1.26.0
+python -m pip install torch==2.11.0+cu128 torchvision==0.26.0+cu128 torchaudio==2.11.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+```
+
+AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
+```powershell
+python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
+python -m pip install "audio-separator[dml]"
 ```
 
 AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:

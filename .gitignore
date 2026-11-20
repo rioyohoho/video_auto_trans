@@ -5,5 +5,9 @@ assets/tmp_musics
 
 test/*
 build/*
+apps/*
+
+.vscode/*
+.code/*
 
 __pycache__
