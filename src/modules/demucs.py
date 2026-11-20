@@ -38,7 +38,7 @@ class Processor:
                     except OSError: pass
                 tmp.rename(out_m)
         except Exception: pass
-    def separate(self,source:Path,output:Path|None=None,is_extract_audio=True,is_clean_music=True) -> tuple[Path,Path]:
+    def separate(self,source:Path,output:Path|None=None,is_extract_audio=True,is_clean_music=False) -> tuple[Path,Path]:
         target_dir = output if output else source.parent
         target_dir.mkdir(parents=True,exist_ok=True)
         if source.suffix.lower() in C.audio_ext:
