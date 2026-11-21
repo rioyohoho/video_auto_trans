@@ -7,7 +7,7 @@ from src.utils.file import r_json, w_json
 from src.utils.text import convert_srt
 from src.utils.logger import progress
 from src.utils import logger as LG
-from src.configuration import READER
+from src.configuration import get_reader
 
 def get_roi_bounds(W: int, H: int, area: Union[Canvas.Area, int], ratio: float = 0.35) -> Tuple[int, int, int, int]:
     if not isinstance(area, Canvas.Area):
@@ -42,11 +42,12 @@ def polygon_to_box(poly: Polygon, W: int, H: int) -> Tuple[int, int, int, int]:
     x_min, y_min = min(int(x_min), W - 2), min(int(y_min), H - 2)
     return x_min, y_min, max(1, int(x_max - x_min)), max(1, int(y_max - y_min))
 def find_text_box_ocr(frame: np.ndarray, area: Union[Canvas.Area, int] = Canvas.Area.BOTTOM, expected_text: Optional[str] = None) -> Optional[Tuple[Tuple[int, int, int, int], str, float]]:
-    if READER is None: return None
+    try: reader = get_reader()
+    except Exception: return None
     H, W = frame.shape[:2]
     xo, yo, xm, ym = get_roi_bounds(W, H, area)
     roi = frame[yo:ym, xo:xm]
-    results = READER.readtext(roi)
+    results = reader.readtext(roi)
     if not results: return None
     candidates = []
     target_clean = expected_text.replace(" ", "").strip() if expected_text else None
@@ -157,7 +158,8 @@ def create_blurs_json(source: Path, output_json: Path, sub_file: Path = None, ar
     def detect_in_roi(frame, ref_text=""):
         crop = frame[ry:ry+rh, rx:rx+rw]
         try:
-            res = READER.readtext(crop)
+            reader = get_reader()
+            res = reader.readtext(crop)
             if not res: return None
             clean_ref = ref_text.replace(" ", "").strip()
             vb = []

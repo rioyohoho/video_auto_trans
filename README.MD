@@ -27,12 +27,6 @@ AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
 python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
 python -m pip install "audio-separator[dml]"
 ```
-
-AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
-```powershell
-python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
-python -m pip install "audio-separator[dml]"
-```
 For AMD on Linux, install a PyTorch/ROCm build supported by the GPU and OS. Whisper through CTranslate2 currently uses CPU on AMD.
 
 **Automatic hardware selection**

@@ -24,11 +24,11 @@ class Data:
 class Range(Data):
 	target:float=0;duration:float=0
 	@staticmethod
-	def timestamp(range:'Range'):return Timestamp.range(range.target, range.target+range.duration)
+	def timestamp(range:'Range'):return Timestamp(start=float(range.target),end=float(range.target+range.duration))
 @dataclass
 class Timestamp(Data):
 	start:float=0;end:float=0
 	@staticmethod
-	def range(timestamp:'Timestamp'):return Range.timestamp(timestamp.start, timestamp.end-timestamp.start)
+	def range(timestamp:'Timestamp'):return Range(target=float(timestamp.start),duration=float(timestamp.end-timestamp.start))
 @dataclass
 class Transcribe(Timestamp):text:str=None

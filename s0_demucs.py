@@ -1,7 +1,7 @@
 import sys,traceback
 from src.enties import agr
 from src.utils import txt,cal_time,handle_input
-from src.configuration import P_DIR,UVR_MODEL
+from src.configuration import P_DIR
 from src.modules import demucs
 from src.workspace import find_workspaces,Workspace
 
@@ -23,11 +23,10 @@ def run(ws:Workspace):
         raise
 
 if __name__=='__main__':
-    process:demucs.Processor=cal_time(lambda:demucs.Processor(),'Load Processor')
     args=handle_input(agr(('-i','--input'),default=P_DIR),agr(('-m','--model'),default='voc'))
-    if args.model.lower()=='inst':UVR_MODEL='UVR-MDX-NET-Inst_HQ_3.onnx'
-    elif args.model.lower()=='voc':UVR_MODEL='UVR-MDX-NET-Voc_FT.onnx'
-    demucs.C.mn_audio_separate=UVR_MODEL
+    if args.model.lower()=='inst':demucs.C.mn_audio_separate='UVR-MDX-NET-Inst_HQ_3.onnx'
+    elif args.model.lower()=='voc':demucs.C.mn_audio_separate='UVR-MDX-NET-Voc_FT.onnx'
+    process:demucs.Processor=cal_time(lambda:demucs.Processor(),'Load Processor')
     workspaces=find_workspaces(args.input)
     if not workspaces:sys.exit(0)
     for ws in workspaces:
