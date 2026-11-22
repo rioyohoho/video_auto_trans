@@ -141,13 +141,13 @@ end tell'''
 def main():
     args=handle_input(
         agr(default=None,name_or_flags=('-i','--input')),
-        agr(default=1,name_or_flags=('-s0','--s0_demucs'),type=str2bool),
+        agr(default=0,name_or_flags=('-s0','--s0_demucs'),type=str2bool),
         agr(default=1,name_or_flags=('-s1','--s1_transcribe'),type=str2bool),
         agr(default=1,name_or_flags=('-s2','--s2_translates'),type=str2bool),
         agr(default=1,name_or_flags=('-s3','--s3_Google_speech'),type=str2bool),
         agr(default=0,name_or_flags=('-s3.1','--s3_AI_speech'),type=str2bool),
-        agr(default=1,name_or_flags=('-s4','--s4_srt'),type=str2bool),
-        agr(default=1,name_or_flags=('-s5','--s5_ocr_delogo'),type=str2bool),
+        agr(default=0,name_or_flags=('-s4','--s4_srt'),type=str2bool),
+        agr(default=0,name_or_flags=('-s5','--s5_ocr_delogo'),type=str2bool),
         agr(default=0,name_or_flags=('-s5.1','--s5.1_ocr_delogo_gui'),type=str2bool),
         agr(default=1,name_or_flags=('-s6','--s6_video_complex'),type=str2bool),
         agr(default=IS_NEW_CMD_WINDOWN,name_or_flags=('-nw','--new_window'),type=str2bool)
