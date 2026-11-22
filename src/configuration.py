@@ -1,4 +1,4 @@
-import os,easyocr
+import os
 from enum import Enum
 from pathlib import Path
 from dotenv import load_dotenv
@@ -8,7 +8,17 @@ env = os.getenv
 env_p=lambda p,dir:p if not p or os.path.isabs(p)or not isinstance(p,str)else dir/p if isinstance(dir,Path)else p
 
 P_DIR = Path(env('PATH_DIR'))
-READER = easyocr.Reader(env('OCR_READER').split(','))
+
+_READER = None
+
+def get_reader():
+	global _READER
+	if _READER is None:
+		import easyocr
+		ocr_langs = env('OCR_READER', 'ch_sim')
+		langs = [lang.strip() for lang in ocr_langs.split(',') if lang.strip()]
+		_READER = easyocr.Reader(langs or ['ch_sim'])
+	return _READER
 class ext:
     AUDIO = ('.mp3','.m4a','.wav','.flac','.aac')
     VIDEO = ('.mp4','.mkv','.avi','.mov')

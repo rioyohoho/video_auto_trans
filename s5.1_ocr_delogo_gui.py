@@ -8,7 +8,7 @@ from src.modules.delogo import get_roi_bounds,box_to_polygon,polygon_to_box,find
 from src.utils.file import r_json,w_json
 from src.utils.text import str2bool
 from src.utils.video import get_media_duration
-from src.configuration import READER
+from src.configuration import get_reader
 def get_box_at(clip:Delogo_KeyFrames,t:float)->tuple[int,int,int,int]:
 	if not clip.keyframes:return 0,0,clip.width,clip.height
 	kfs=sorted(clip.keyframes,key=lambda k:k.t)
@@ -32,7 +32,7 @@ class OCRWorker(QThread):
 	def detect_in_roi(self,fr,ref_text=''):
 		rx,ry,rw,rh=self.roi;crop=fr[ry:ry+rh,rx:rx+rw]
 		try:
-			res=READER.readtext(crop)
+			res=get_reader().readtext(crop)
 			if not res:return
 			clean_ref=ref_text.replace(' ','').strip();valid_boxes=[]
 			for(bbox,text,prob)in res:

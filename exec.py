@@ -4,6 +4,7 @@ from src.enties import agr,Canvas
 from src.utils import handle_input,ext,txt
 from src.configuration import TAR_LANG,LANGS,XTTS_TMP_VOICE,RENDER_CONFIG
 from src.workspace import Model,TransModel
+# $env:PYTHONUTF8=1
 
 IS_NEW_CMD_WINDOWN = False
 BASE_DIR=os.path.dirname(os.path.abspath(__file__))

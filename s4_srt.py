@@ -31,7 +31,7 @@ def run_word_srt(ws:Workspace,lang:str,words:int=1,primary_color:str=None,sec_co
     audio_target=ws.find_media_srt(lang)
     if primary_color:
         raw_words:list[Transcribe]=mdl.transcribe_length(str(audio_target),lang,1)
-        for d in raw_words:d.text=re.sub(r'[,.!@?]','',d.text).strip()
+        for d in raw_words:d.text=re.sub(r'[^\w\s]+','',d.text,flags=re.UNICODE).strip()
         groups,n,data=split_sentence_words([w for w in raw_words if w.text]),max(1,words),[]
         for gw in groups:
             for i in range(0,len(gw),n):
@@ -40,7 +40,7 @@ def run_word_srt(ws:Workspace,lang:str,words:int=1,primary_color:str=None,sec_co
     else:
         data:list[Transcribe]=mdl.transcribe_length(str(audio_target),lang,words)if words>0 else mdl.transcribe(str(audio_target),lang)
         if words==1:
-            for d in data:d.text=re.sub(r'[,.!@?]','',d.text).strip()
+            for d in data:d.text=re.sub(r'[^\w\s]+','',d.text,flags=re.UNICODE).strip()
     w_json(str(out_json),[asdict(d)for d in data])
     w_text(str(out_srt),to_srt([astuple(d)for d in data]))
     txt.green(f'[DONE]: "{str(out_json)}"')

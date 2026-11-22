@@ -1,18 +1,17 @@
-import os,time,logging
+import os,shutil,logging
 from pathlib import Path
 import numpy as np
 from scipy.signal import correlate
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 from src.utils import extract_audio
-from src.utils.hardware import is_directml_available
 from src.configuration import ext,UVR_MODEL,UVR_DIR_PATH
 class C:
     fmt,model_dir,mn_audio_separate,log_level = 'mp3',UVR_DIR_PATH,UVR_MODEL,logging.WARNING
     audio_ext,video_ext,n_voice,n_instrumental = ext.AUDIO,ext.VIDEO,'vocal','music'
 class Processor:
     def __init__(self):
-        self.separator = Separator(model_file_dir=C.model_dir,output_format=C.fmt,log_level=C.log_level,use_directml=is_directml_available())
+        self.separator = Separator(model_file_dir=C.model_dir,output_format=C.fmt,log_level=C.log_level,use_directml=False,mdx_params={"hop_length":1024,"segment_size":256,"overlap":0.25,"batch_size":4,"enable_denoise":False})
         self.separator.load_model(C.mn_audio_separate)
     def _clean(self,orig_p:Path,voc_p:Path,out_m:Path):
         try:
@@ -44,9 +43,9 @@ class Processor:
         if source.suffix.lower() in C.audio_ext:
             v_au = source
         elif is_extract_audio:
-            audio_path = target_dir/f"{source.stem}_demucs.flac"
+            audio_path = target_dir/f"{source.stem}_demucs.wav"
             audio_path.unlink(missing_ok=True)
-            v_au = extract_audio(source, suffix='.flac', output_path=audio_path)
+            v_au = extract_audio(source,suffix='.wav',output_path=audio_path)
             if v_au is None: raise RuntimeError(f"Failed to extract audio: {source}")
         else:
             v_au = source
@@ -60,30 +59,27 @@ class Processor:
         for item in out[:2]:
             p = Path(item)
             if not p.exists():
-                for d in [source.parent,Path.cwd(),Path(os.environ.get('TEMP',''))]:
+                for d in [target_dir,source.parent,Path.cwd(),Path(os.environ.get('TEMP',''))]:
                     if d and (d/p.name).exists(): p = d/p.name;break
             files.append(p)
         f1,f2 = files[0],files[1]
         n1,n2 = f1.name.lower(),f2.name.lower()
         v_s,m_s = (f1,f2) if (('vocal' in n1 and 'no' not in n1 and 'inst' not in n1) or 'inst' in n2 or 'no' in n2 or 'music' in n2) else (f2,f1)
         if not v_s.exists() or not m_s.exists(): raise RuntimeError(f"Stems not found: {source}")
-        for _ in range(120):
-            if v_s.stat().st_size>0 and m_s.stat().st_size>0:
-                s1,s2 = v_s.stat().st_size,m_s.stat().st_size
-                time.sleep(0.5)
-                if v_s.stat().st_size==s1 and m_s.stat().st_size==s2: break
-            time.sleep(0.5)
         for t,s in [(p_v,v_s),(p_n,m_s)]:
-            temp_target = target_dir/f"temp_{t.name}"
-            AudioSegment.from_file(str(s.resolve())).export(str(temp_target),format="mp3",bitrate="192k")
-            if temp_target.exists():
-                if t.exists():
-                    try: t.unlink()
-                    except OSError: pass
-                temp_target.rename(t)
+            if s.resolve() == t.resolve(): continue
+            if t.exists():
+                try: t.unlink()
+                except OSError: pass
+            if s.suffix.lower() == '.mp3':
+                shutil.move(str(s),str(t))
+            else:
+                temp_target = target_dir/f"temp_{t.name}"
+                AudioSegment.from_file(str(s.resolve())).export(str(temp_target),format="mp3",bitrate="192k")
+                if temp_target.exists(): temp_target.rename(t)
         if is_clean_music and v_au.exists() and p_v.exists() and p_n.exists(): self._clean(v_au,p_v,p_n)
         for s in [v_s,m_s]:
-            if s.exists():
+            if s.exists() and s not in (p_v,p_n):
                 try: s.unlink()
                 except OSError: pass
         return p_v,p_n

@@ -20,12 +20,12 @@ The requirements file uses the CPU ONNX Runtime extra by default. Install only o
 python -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml torch torchvision torchaudio
 python -m pip install onnxruntime-gpu==1.26.0
 python -m pip install torch==2.11.0+cu128 torchvision==0.26.0+cu128 torchaudio==2.11.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-```
 
-AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
-```powershell
-python -m pip uninstall -y audio-separator onnxruntime onnxruntime-gpu onnxruntime-directml
-python -m pip install "audio-separator[dml]"
+# demucs
+pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml
+pip install --no-cache-dir "onnxruntime-gpu[cuda,cudnn]==1.26.0"
+
+
 ```
 
 AMD on Windows: use DirectML instead of the NVIDIA/CUDA packages:
